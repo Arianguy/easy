@@ -100,18 +100,26 @@
                             @enderror
                         </div>
 
-                        @if ($mobileExists)
-                            <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+                        @if ($mobileCheckMessage)
+                            <div class="mt-4 p-4 {{ $mobileExists ? 'bg-green-50 border border-green-200' : 'bg-blue-50 border border-blue-200' }} rounded-md">
                                 <div class="flex">
                                     <div class="flex-shrink-0">
-                                        <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                        </svg>
+                                        @if($mobileExists)
+                                            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                            </svg>
+                                        @else
+                                            <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                            </svg>
+                                        @endif
                                     </div>
                                     <div class="ml-3">
-                                        <h3 class="text-sm font-medium text-green-800">Customer Found!</h3>
-                                        <p class="text-sm text-green-700 mt-1">
-                                            We found an existing customer with this mobile number. Their details have been pre-filled.
+                                        <h3 class="text-sm font-medium {{ $mobileExists ? 'text-green-800' : 'text-blue-800' }}">
+                                            {{ $mobileExists ? 'Customer Found!' : 'New Customer' }}
+                                        </h3>
+                                        <p class="text-sm {{ $mobileExists ? 'text-green-700' : 'text-blue-700' }} mt-1">
+                                            {{ $mobileCheckMessage }}
                                         </p>
                                     </div>
                                 </div>
@@ -137,202 +145,293 @@
                 <div class="bg-white rounded-lg shadow-sm border p-6">
                     <div class="mb-6">
                         <h2 class="text-2xl font-bold text-gray-900 mb-2">
-                            {{ $mobileExists ? 'Update Customer Details' : 'Customer Information' }}
+                            {{ $mobileExists ? 'Existing Customer Details' : 'Customer Information' }}
                         </h2>
-                        <p class="text-gray-600">Please fill in the customer details</p>
+                        <p class="text-gray-600">
+                            @if($mobileExists)
+                                Customer details are read-only for existing customers. Only lead details can be modified.
+                            @else
+                                Please fill in the customer details
+                            @endif
+                        </p>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- First Name -->
-                        <div>
-                            <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">
-                                First Name <span class="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                id="first_name"
-                                wire:model="first_name"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="First Name"
-                            />
-                            @error('first_name')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <!-- Last Name -->
-                        <div>
-                            <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">
-                                Last Name <span class="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                id="last_name"
-                                wire:model="last_name"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Last Name"
-                            />
-                            @error('last_name')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                                                <!-- Mobile (Editable in create mode) -->
-                        <div>
-                                                         <label for="mobile_step2" class="block text-sm font-medium text-gray-700 mb-2">
-                                 Mobile Number <span class="text-red-500">*</span>
-                                 @if(!$leadId)
-                                     <span class="ml-2 text-xs text-gray-500">(Click to edit)</span>
-                                 @endif
-                             </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span class="text-gray-500 font-medium">+91</span>
+                    @if($mobileExists)
+                        <!-- Existing Customer Details Card -->
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 rounded-xl p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                    </div>
                                 </div>
-                                <input
-                                    type="tel"
-                                    id="mobile_step2"
-                                    wire:model="mobile"
-                                    wire:blur="checkMobileOnBlur"
-                                    class="block w-full pl-12 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 @error('mobile') border-red-300 focus:ring-red-500 focus:border-red-500 @enderror"
-                                    placeholder="Enter 10 digit mobile number"
-                                    inputmode="numeric"
-                                    pattern="[0-9]*"
-                                    maxlength="10"
-                                />
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-semibold text-gray-900">{{ trim($first_name . ' ' . $last_name) }}</h3>
+                                    <p class="text-sm text-gray-600">Existing Customer</p>
+                                </div>
                             </div>
-                            @error('mobile')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile Number</label>
+                                        <p class="mt-1 text-sm font-semibold text-gray-900">+91 {{ $mobile }}</p>
+                                    </div>
+
+                                    @if($phone)
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Phone Number</label>
+                                        <p class="mt-1 text-sm text-gray-900">{{ $phone }}</p>
+                                    </div>
+                                    @endif
+
+                                    @if($email)
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Email</label>
+                                        <p class="mt-1 text-sm text-gray-900">{{ $email }}</p>
+                                    </div>
+                                    @endif
+
+                                    @if($company)
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Company</label>
+                                        <p class="mt-1 text-sm text-gray-900">{{ $company }}</p>
+                                    </div>
+                                    @endif
+                                </div>
+
+                                <div class="space-y-3">
+                                    @if($customer_interest)
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Interests</label>
+                                        <p class="mt-1 text-sm text-gray-900">{{ $customer_interest }}</p>
+                                    </div>
+                                    @endif
+
+                                    @if($age_group)
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Age Group</label>
+                                        <p class="mt-1 text-sm text-gray-900">{{ $ageGroups[$age_group] ?? $age_group }}</p>
+                                    </div>
+                                    @endif
+
+                                    @if($address)
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Address</label>
+                                        <p class="mt-1 text-sm text-gray-900">{{ $address }}</p>
+                                    </div>
+                                    @endif
+
+                                    @if($remarks)
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</label>
+                                        <p class="mt-1 text-sm text-gray-900">{{ $remarks }}</p>
+                                    </div>
+                                    @endif
+                                </div>
+                            </div>
 
                             @if ($mobileCheckMessage)
-                                <div class="mt-2 p-3 {{ $mobileExists ? 'bg-green-50 border border-green-200' : 'bg-blue-50 border border-blue-200' }} rounded-md">
+                                <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                                     <div class="flex">
                                         <div class="flex-shrink-0">
-                                            @if($mobileExists)
-                                                <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                                </svg>
-                                            @else
-                                                <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                                                </svg>
-                                            @endif
+                                            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                            </svg>
                                         </div>
                                         <div class="ml-3">
-                                            <p class="text-sm font-medium {{ $mobileExists ? 'text-green-800' : 'text-blue-800' }}">
-                                                {{ $mobileCheckMessage }}
-                                            </p>
+                                            <p class="text-sm font-medium text-green-800">{{ $mobileCheckMessage }}</p>
                                         </div>
                                     </div>
                                 </div>
                             @endif
                         </div>
+                    @else
+                        <!-- New Customer Form -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- First Name -->
+                            <div>
+                                <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                    First Name <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="first_name"
+                                    wire:model="first_name"
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="First Name"
+                                />
+                                @error('first_name')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-                        <!-- Phone -->
-                        <div>
-                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
-                                Phone Number
-                            </label>
-                            <input
-                                type="tel"
-                                id="phone"
-                                wire:model="phone"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Phone Number"
-                            />
-                        </div>
+                            <!-- Last Name -->
+                            <div>
+                                <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Last Name <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="last_name"
+                                    wire:model="last_name"
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Last Name"
+                                />
+                                @error('last_name')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-                        <!-- Email -->
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                id="email"
-                                wire:model="email"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Email Address"
-                            />
-                            @error('email')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                            <!-- Mobile (Editable for new customers) -->
+                            <div>
+                                <label for="mobile_step2" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Mobile Number <span class="text-red-500">*</span>
+                                    <span class="ml-2 text-xs text-gray-500">(Click to edit)</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 font-medium">+91</span>
+                                    </div>
+                                    <input
+                                        type="tel"
+                                        id="mobile_step2"
+                                        wire:model="mobile"
+                                        wire:blur="checkMobileOnBlur"
+                                        class="block w-full pl-12 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 @error('mobile') border-red-300 focus:ring-red-500 focus:border-red-500 @enderror"
+                                        placeholder="Enter 10 digit mobile number"
+                                        inputmode="numeric"
+                                        pattern="[0-9]*"
+                                        maxlength="10"
+                                    />
+                                </div>
+                                @error('mobile')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
 
-                        <!-- Company -->
-                        <div>
-                            <label for="company" class="block text-sm font-medium text-gray-700 mb-2">
-                                Company
-                            </label>
-                            <input
-                                type="text"
-                                id="company"
-                                wire:model="company"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Company Name"
-                            />
-                        </div>
+                                @if ($mobileCheckMessage)
+                                    <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                        <div class="flex">
+                                            <div class="flex-shrink-0">
+                                                <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-blue-800">{{ $mobileCheckMessage }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
 
-                        <!-- Address -->
-                        <div class="md:col-span-2">
-                            <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
-                                Address
-                            </label>
-                            <textarea
-                                id="address"
-                                wire:model="address"
-                                rows="3"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Full Address"
-                            ></textarea>
-                        </div>
+                            <!-- Phone -->
+                            <div>
+                                <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Phone Number
+                                </label>
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    wire:model="phone"
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Phone Number"
+                                />
+                            </div>
 
-                        <!-- Customer Interest -->
-                        <div>
-                            <label for="customer_interest" class="block text-sm font-medium text-gray-700 mb-2">
-                                Customer Interest
-                            </label>
-                            <input
-                                type="text"
-                                id="customer_interest"
-                                wire:model="customer_interest"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Areas of Interest"
-                            />
-                        </div>
+                            <!-- Email -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Email
+                                </label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    wire:model="email"
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Email Address"
+                                />
+                                @error('email')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
 
-                        <!-- Age Group -->
-                        <div>
-                            <label for="age_group" class="block text-sm font-medium text-gray-700 mb-2">
-                                Age Group
-                            </label>
-                            <select
-                                id="age_group"
-                                wire:model="age_group"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                            >
-                                <option value="">--Select--</option>
-                                @foreach($ageGroups as $key => $label)
-                                    <option value="{{ $key }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                            <!-- Company -->
+                            <div>
+                                <label for="company" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Company
+                                </label>
+                                <input
+                                    type="text"
+                                    id="company"
+                                    wire:model="company"
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Company Name"
+                                />
+                            </div>
 
-                        <!-- Remarks -->
-                        <div class="md:col-span-2">
-                            <label for="remarks" class="block text-sm font-medium text-gray-700 mb-2">
-                                Remarks
-                            </label>
-                            <textarea
-                                id="remarks"
-                                wire:model="remarks"
-                                rows="3"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="Additional notes or remarks"
-                            ></textarea>
+                            <!-- Address -->
+                            <div class="md:col-span-2">
+                                <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Address
+                                </label>
+                                <textarea
+                                    id="address"
+                                    wire:model="address"
+                                    rows="3"
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Full Address"
+                                ></textarea>
+                            </div>
+
+                            <!-- Customer Interest -->
+                            <div>
+                                <label for="customer_interest" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Customer Interest
+                                </label>
+                                <input
+                                    type="text"
+                                    id="customer_interest"
+                                    wire:model="customer_interest"
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Areas of Interest"
+                                />
+                            </div>
+
+                            <!-- Age Group -->
+                            <div>
+                                <label for="age_group" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Age Group
+                                </label>
+                                <select
+                                    id="age_group"
+                                    wire:model="age_group"
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="">--Select--</option>
+                                    @foreach($ageGroups as $key => $label)
+                                        <option value="{{ $key }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Remarks -->
+                            <div class="md:col-span-2">
+                                <label for="remarks" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Remarks
+                                </label>
+                                <textarea
+                                    id="remarks"
+                                    wire:model="remarks"
+                                    rows="3"
+                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Additional notes or remarks"
+                                ></textarea>
+                            </div>
                         </div>
-                    </div>
+                    @endif
 
                     <div class="flex justify-between mt-6">
                         <button

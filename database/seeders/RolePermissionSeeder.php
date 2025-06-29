@@ -58,6 +58,12 @@ class RolePermissionSeeder extends Seeder
             'edit users',
             'delete users',
 
+            // Permission permissions
+            'view permissions',
+            'create permissions',
+            'edit permissions',
+            'delete permissions',
+
             // Report permissions
             'view reports',
             'export reports',
@@ -68,18 +74,18 @@ class RolePermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
         // Create roles and assign permissions
 
         // Area Manager - Full access across all branches
-        $areaManager = Role::create(['name' => 'Area Manager']);
-        $areaManager->givePermissionTo(Permission::all());
+        $areaManager = Role::firstOrCreate(['name' => 'Area Manager']);
+        $areaManager->syncPermissions(Permission::all());
 
         // Sales Manager - Full access within their branch
-        $salesManager = Role::create(['name' => 'Sales Manager']);
-        $salesManager->givePermissionTo([
+        $salesManager = Role::firstOrCreate(['name' => 'Sales Manager']);
+        $salesManager->syncPermissions([
             'view customers',
             'create customers',
             'edit customers',
@@ -104,13 +110,14 @@ class RolePermissionSeeder extends Seeder
             'view users',
             'create users',
             'edit users',
+            'view permissions',
             'view reports',
             'export reports',
         ]);
 
         // Sales Executive - Limited access to assigned leads and customers
-        $salesExecutive = Role::create(['name' => 'Sales Executive']);
-        $salesExecutive->givePermissionTo([
+        $salesExecutive = Role::firstOrCreate(['name' => 'Sales Executive']);
+        $salesExecutive->syncPermissions([
             'view customers',
             'create customers',
             'edit customers',

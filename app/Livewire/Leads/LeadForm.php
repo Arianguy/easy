@@ -121,9 +121,9 @@ class LeadForm extends Component
         // Clear previous message when typing
         $this->mobileCheckMessage = '';
 
-        // Only auto-check in step 1
+        // Only auto-check in step 1, but don't auto-advance
         if ($this->step == 1 && strlen($this->mobile) == 10) {
-            $this->checkMobileExists();
+            $this->checkMobileExistsWithMessage();
         }
     }
 
@@ -190,6 +190,7 @@ class LeadForm extends Component
             $this->existingCustomer = $customer;
             $this->mobileExists = true;
             $this->showCustomerDetails = true;
+            $this->mobileCheckMessage = 'Customer found! Details will be pre-filled.';
 
             // Pre-fill customer details
             $this->first_name = explode(' ', $customer->name)[0] ?? '';
@@ -201,12 +202,14 @@ class LeadForm extends Component
             $this->phone = $customer->phone ?? '';
             $this->remarks = $customer->notes ?? '';
 
-            $this->step = 2;
+            // Stay on step 1, don't auto-advance
         } else {
             $this->existingCustomer = null;
             $this->mobileExists = false;
             $this->showCustomerDetails = true;
-            $this->step = 2;
+            $this->mobileCheckMessage = 'New mobile number - customer details will be created.';
+
+            // Stay on step 1, don't auto-advance
         }
     }
 
@@ -214,7 +217,10 @@ class LeadForm extends Component
     {
         if ($this->step == 1) {
             $this->validate(['mobile' => 'required|regex:/^[0-9]{10}$/']);
+            // Check mobile exists but don't auto-advance - user clicked Continue
             $this->checkMobileExists();
+            // Now advance to step 2
+            $this->step = 2;
         } elseif ($this->step == 2) {
             $this->validateCustomerDetails();
             $this->step = 3;
@@ -232,11 +238,15 @@ class LeadForm extends Component
 
     public function validateCustomerDetails()
     {
-        $this->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-        ]);
+        // If mobile exists (existing customer), don't validate customer details
+        // as they should be read-only
+        if (!$this->mobileExists) {
+            $this->validate([
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'email' => 'nullable|email|max:255',
+            ]);
+        }
     }
 
     public function save()
@@ -273,8 +283,8 @@ class LeadForm extends Component
                 'priority' => $this->priority,
                 'source' => $this->source,
                 'follow_up_date' => $this->follow_up_date,
-                'estimated_value' => $this->estimated_value,
-                'expected_close_date' => $this->expected_close_date,
+                'estimated_value' => $this->estimated_value ?: null,
+                'expected_close_date' => $this->expected_close_date ?: null,
                 'notes' => $this->notes,
                 'customer_id' => $customer->id,
                 'assigned_user_id' => $this->assigned_user_id,

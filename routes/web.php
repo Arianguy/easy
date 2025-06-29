@@ -48,6 +48,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('users', App\Livewire\Management\UsersList::class)->name('users.index');
         Route::get('users/create', App\Livewire\Management\UserForm::class)->name('users.create');
         Route::get('users/{user}/edit', App\Livewire\Management\UserForm::class)->name('users.edit');
+
+        Route::get('permissions', App\Livewire\Management\PermissionsList::class)->name('permissions.index');
+        Route::get('permissions/create', App\Livewire\Management\PermissionForm::class)->name('permissions.create');
+        Route::get('permissions/{permission}/edit', App\Livewire\Management\PermissionForm::class)->name('permissions.edit');
     });
 });
 
