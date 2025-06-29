@@ -18,8 +18,8 @@ class Dashboard extends Component
 
     public function mount()
     {
-        if (!auth()->user()->canManageAllBranches()) {
-            $this->selectedBranch = auth()->user()->branch_id;
+        if (!auth()->user()?->canManageAllBranches()) {
+            $this->selectedBranch = auth()->user()?->branch_id;
         }
     }
 
@@ -214,9 +214,7 @@ class Dashboard extends Component
             ->having('total_leads', '>', 0)
             ->get()
             ->map(function ($user) {
-                $user->conversion_rate = $user->total_leads > 0
-                    ? round(($user->converted_leads / $user->total_leads) * 100, 1)
-                    : 0;
+                // Use the model's existing accessor instead of modifying the property
                 return $user;
             })
             ->sortByDesc('conversion_rate')

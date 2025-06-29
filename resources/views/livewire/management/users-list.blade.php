@@ -1,4 +1,4 @@
-<flux:main>
+<div>
     <flux:header>
         <flux:heading size="lg">{{ __('User Management') }}</flux:heading>
 
@@ -184,4 +184,4 @@
             </div>
         </div>
     </div>
-</flux:main>
+</div>

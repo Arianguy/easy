@@ -1,4 +1,4 @@
-<flux:main>
+<div>
     <flux:header>
         <flux:heading size="lg">{{ $isEditing ? 'Edit Customer' : 'Add Customer' }}</flux:heading>
 
@@ -16,26 +16,14 @@
                 <flux:heading size="md" class="mb-6">Basic Information</flux:heading>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
+                    <div class="md:col-span-2">
                         <flux:input
-                            wire:model="first_name"
-                            label="First Name"
-                            placeholder="Enter first name"
+                            wire:model="name"
+                            label="Full Name"
+                            placeholder="Enter customer full name"
                             required
                         />
-                        @error('first_name')
-                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <flux:input
-                            wire:model="last_name"
-                            label="Last Name"
-                            placeholder="Enter last name"
-                            required
-                        />
-                        @error('last_name')
+                        @error('name')
                             <div class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
                         @enderror
                     </div>
@@ -46,7 +34,6 @@
                             label="Email"
                             type="email"
                             placeholder="Enter email address"
-                            required
                         />
                         @error('email')
                             <div class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
@@ -64,7 +51,18 @@
                         @enderror
                     </div>
 
-                    <div class="md:col-span-2">
+                    <div>
+                        <flux:input
+                            wire:model="mobile"
+                            label="Mobile"
+                            placeholder="Enter mobile number"
+                        />
+                        @error('mobile')
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div>
                         <flux:input
                             wire:model="company"
                             label="Company"
@@ -77,62 +75,45 @@
                 </div>
             </div>
 
-            <!-- Address Information -->
+            <!-- Address & Details -->
             <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                <flux:heading size="md" class="mb-6">Address Information</flux:heading>
+                <flux:heading size="md" class="mb-6">Address & Details</flux:heading>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="md:col-span-2">
-                        <flux:input
+                        <flux:textarea
                             wire:model="address"
                             label="Address"
-                            placeholder="Enter street address"
+                            placeholder="Enter full address"
+                            rows="3"
                         />
                         @error('address')
                             <div class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    <div>
-                        <flux:input
-                            wire:model="city"
-                            label="City"
-                            placeholder="Enter city"
+                    <div class="md:col-span-2">
+                        <flux:textarea
+                            wire:model="interests"
+                            label="Interests"
+                            placeholder="Enter customer interests or requirements"
+                            rows="3"
                         />
-                        @error('city')
+                        @error('interests')
                             <div class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div>
                         <flux:input
-                            wire:model="state"
-                            label="State/Province"
-                            placeholder="Enter state or province"
+                            wire:model="budget_range"
+                            label="Budget Range"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="Enter budget range"
                         />
-                        @error('state')
-                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <flux:input
-                            wire:model="postal_code"
-                            label="Postal Code"
-                            placeholder="Enter postal code"
-                        />
-                        @error('postal_code')
-                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <flux:input
-                            wire:model="country"
-                            label="Country"
-                            placeholder="Enter country"
-                        />
-                        @error('country')
+                        @error('budget_range')
                             <div class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
                         @enderror
                     </div>
@@ -145,11 +126,30 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Source</label>
+                        <select
+                            wire:model="source"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-blue-500"
+                        >
+                            <option value="walk_in">Walk In</option>
+                            <option value="referral">Referral</option>
+                            <option value="online">Online</option>
+                            <option value="campaign">Campaign</option>
+                            <option value="cold_call">Cold Call</option>
+                            <option value="other">Other</option>
+                        </select>
+                        @error('source')
+                            <div class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
                         <select
                             wire:model="status"
                             class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-blue-500"
                         >
+                            <option value="potential">Potential</option>
                             <option value="active">Active</option>
                             <option value="inactive">Inactive</option>
                         </select>
@@ -158,7 +158,7 @@
                         @enderror
                     </div>
 
-                    <div>
+                    <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Branch</label>
                         <select
                             wire:model="branch_id"
@@ -200,4 +200,4 @@
             </div>
         </form>
     </div>
-</flux:main>
+</div>

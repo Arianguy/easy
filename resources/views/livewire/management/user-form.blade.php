@@ -1,4 +1,4 @@
-<flux:main>
+<div>
     <flux:header>
         <flux:heading size="lg">{{ $isEditing ? 'Edit User' : 'Add User' }}</flux:heading>
 
@@ -149,4 +149,4 @@
             </div>
         </form>
     </div>
-</flux:main>
+</div>

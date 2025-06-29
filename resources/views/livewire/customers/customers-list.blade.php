@@ -1,4 +1,4 @@
-<flux:main>
+<div>
     <flux:header>
         <flux:heading size="lg">{{ __('Customers') }}</flux:heading>
 
@@ -25,6 +25,7 @@
                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-blue-500"
                 >
                     <option value="">All Statuses</option>
+                    <option value="potential">Potential</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                 </select>
@@ -39,7 +40,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Email</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Phone</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contact</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
@@ -52,7 +53,7 @@
                                     <div class="flex items-center">
                                         <div>
                                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                {{ $customer->first_name }} {{ $customer->last_name }}
+                                                {{ $customer->name }}
                                             </div>
                                             @if($customer->company)
                                                 <div class="text-sm text-gray-500 dark:text-gray-400">{{ $customer->company }}</div>
@@ -61,10 +62,18 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $customer->email }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $customer->phone }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                    @if($customer->mobile)
+                                        {{ $customer->mobile }} (M)
+                                    @elseif($customer->phone)
+                                        {{ $customer->phone }} (P)
+                                    @else
+                                        No contact
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4">
                                     <flux:badge
-                                        :color="$customer->status === 'active' ? 'green' : 'red'"
+                                        :color="$customer->status === 'active' ? 'green' : ($customer->status === 'potential' ? 'yellow' : 'red')"
                                         size="sm"
                                     >
                                         {{ ucfirst($customer->status) }}
@@ -117,4 +126,4 @@
             </div>
         @endif
     </div>
-</flux:main>
+</div>
