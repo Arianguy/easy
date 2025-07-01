@@ -10,6 +10,25 @@
     </flux:header>
 
     <div class="max-w-4xl">
+        {{-- Display general errors --}}
+        @if (session()->has('error'))
+            <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="text-red-800">{{ session('error') }}</div>
+            </div>
+        @endif
+
+        {{-- Display validation errors --}}
+        @if ($errors->any())
+            <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="text-red-800 font-medium mb-2">Please fix the following errors:</div>
+                <ul class="list-disc list-inside text-red-700">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <form wire:submit="save" class="space-y-8">
             <!-- Basic Information -->
             <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
@@ -92,14 +111,55 @@
                         @enderror
                     </div>
 
+                    <!-- Customer Interests -->
                     <div class="md:col-span-2">
-                        <flux:textarea
-                            wire:model="interests"
-                            label="Interests"
-                            placeholder="Enter customer interests or requirements"
-                            rows="3"
-                        />
-                        @error('interests')
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Customer Interests
+                        </label>
+                        <div class="space-y-2">
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($allInterests as $interest)
+                                    <label class="inline-flex items-center cursor-pointer interest-tag"
+                                           data-interest-id="{{ $interest->id }}"
+                                           data-interest-color="{{ $interest->color }}">
+                                        <input
+                                            type="checkbox"
+                                            wire:model.live="customer_interests"
+                                            value="{{ $interest->id }}"
+                                            class="sr-only interest-checkbox"
+                                            id="interest_{{ $interest->id }}"
+                                        >
+                                        <span class="px-3 py-1 rounded-full text-sm font-medium border-2 transition-all duration-200 select-none interest-span
+                                            @if(in_array($interest->id, $customer_interests))
+                                                text-white
+                                            @else
+                                                text-gray-700 hover:border-gray-400 dark:text-gray-300 dark:hover:border-gray-500
+                                            @endif"
+                                            style="@if(in_array($interest->id, $customer_interests))
+                                                background-color: {{ $interest->color }}; border-color: {{ $interest->color }};
+                                            @else
+                                                border-color: #d1d5db;
+                                            @endif">
+                                            {{ $interest->name }}
+                                        </span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Select multiple interests that apply to this customer</p>
+                            @if(count($customer_interests) > 0)
+                                <div class="text-xs text-blue-600 dark:text-blue-400">
+                                    Selected: {{ count($customer_interests) }} interest(s)
+                                </div>
+                            @endif
+
+                            {{-- Debug info --}}
+                            @if(config('app.debug'))
+                                <div class="text-xs text-gray-400 mt-1">
+                                    Debug: {{ json_encode($customer_interests) }}
+                                </div>
+                            @endif
+                        </div>
+                        @error('customer_interests')
                             <div class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
                         @enderror
                     </div>
@@ -194,10 +254,98 @@
                 <flux:button type="button" wire:click="cancel" variant="ghost">
                     Cancel
                 </flux:button>
-                <flux:button type="submit" variant="primary">
-                    {{ $isEditing ? 'Update Customer' : 'Create Customer' }}
+                <flux:button type="submit" variant="primary" wire:loading.attr="disabled">
+                    <span wire:loading.remove>{{ $isEditing ? 'Update Customer' : 'Create Customer' }}</span>
+                    <span wire:loading>Saving...</span>
                 </flux:button>
             </div>
+
+            {{-- Debug info --}}
+            @if(config('app.debug'))
+                <div class="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs">
+                    <strong>Debug Info:</strong><br>
+                    Name: {{ $name }}<br>
+                    Branch ID: {{ $branch_id }}<br>
+                    Customer Interests: {{ json_encode($customer_interests) }}<br>
+                    Is Editing: {{ $isEditing ? 'true' : 'false' }}
+                </div>
+            @endif
         </form>
     </div>
+
+    <!-- Interest tag styles -->
+    <style>
+        /* Interest tag styles */
+        .interest-tag {
+            transition: transform 0.1s ease;
+        }
+
+        .interest-tag:hover {
+            transform: scale(1.02);
+        }
+
+        .interest-tag:active {
+            transform: scale(0.98);
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enhanced interest selection
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.interest-tag')) {
+                    const tag = e.target.closest('.interest-tag');
+                    const checkbox = tag.querySelector('.interest-checkbox');
+                    const span = tag.querySelector('.interest-span');
+                    const interestId = tag.dataset.interestId;
+                    const interestColor = tag.dataset.interestColor;
+
+                    // Toggle checkbox
+                    checkbox.checked = !checkbox.checked;
+
+                    // Trigger Livewire update
+                    checkbox.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    // Update visual state immediately for better UX
+                    if (checkbox.checked) {
+                        span.style.backgroundColor = interestColor;
+                        span.style.borderColor = interestColor;
+                        span.style.color = 'white';
+                        span.classList.remove('text-gray-700', 'hover:border-gray-400', 'dark:text-gray-300', 'dark:hover:border-gray-500');
+                        span.classList.add('text-white');
+                    } else {
+                        span.style.backgroundColor = '';
+                        span.style.borderColor = '#d1d5db';
+                        span.style.color = '';
+                        span.classList.remove('text-white');
+                        span.classList.add('text-gray-700', 'hover:border-gray-400', 'dark:text-gray-300', 'dark:hover:border-gray-500');
+                    }
+                }
+            });
+        });
+
+        // Listen for Livewire updates to refresh interest states
+        document.addEventListener('livewire:updated', function() {
+            // Update interest tag states after Livewire updates
+            document.querySelectorAll('.interest-tag').forEach(function(tag) {
+                const checkbox = tag.querySelector('.interest-checkbox');
+                const span = tag.querySelector('.interest-span');
+                const interestColor = tag.dataset.interestColor;
+
+                if (checkbox.checked) {
+                    span.style.backgroundColor = interestColor;
+                    span.style.borderColor = interestColor;
+                    span.style.color = 'white';
+                    span.classList.remove('text-gray-700', 'hover:border-gray-400', 'dark:text-gray-300', 'dark:hover:border-gray-500');
+                    span.classList.add('text-white');
+                } else {
+                    span.style.backgroundColor = '';
+                    span.style.borderColor = '#d1d5db';
+                    span.style.color = '';
+                    span.classList.remove('text-white');
+                    span.classList.add('text-gray-700', 'hover:border-gray-400', 'dark:text-gray-300', 'dark:hover:border-gray-500');
+                }
+            });
+        });
+    </script>
 </div>

@@ -203,10 +203,17 @@
                                 </div>
 
                                 <div class="space-y-3">
-                                    @if($customer_interest)
+                                    @if(count($customer_interests) > 0)
                                     <div>
                                         <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Interests</label>
-                                        <p class="mt-1 text-sm text-gray-900">{{ $customer_interest }}</p>
+                                        <div class="mt-1 flex flex-wrap gap-1">
+                                            @foreach($interests->filter(function($interest) use ($customer_interests) { return in_array($interest->id, $customer_interests); }) as $interest)
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                                                      style="background-color: {{ $interest->color }}20; color: {{ $interest->color }};">
+                                                    {{ $interest->name }}
+                                                </span>
+                                            @endforeach
+                                        </div>
                                     </div>
                                     @endif
 
@@ -386,18 +393,54 @@
                                 ></textarea>
                             </div>
 
-                            <!-- Customer Interest -->
-                            <div>
-                                <label for="customer_interest" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Customer Interest
+                            <!-- Customer Interests -->
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Customer Interests
                                 </label>
-                                <input
-                                    type="text"
-                                    id="customer_interest"
-                                    wire:model="customer_interest"
-                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="Areas of Interest"
-                                />
+                                <div class="space-y-2">
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach($interests as $interest)
+                                            <label class="inline-flex items-center cursor-pointer interest-tag"
+                                                   data-interest-id="{{ $interest->id }}"
+                                                   data-interest-color="{{ $interest->color }}">
+                                                <input
+                                                    type="checkbox"
+                                                    wire:model.live="customer_interests"
+                                                    value="{{ $interest->id }}"
+                                                    class="sr-only interest-checkbox"
+                                                    id="interest_{{ $interest->id }}"
+                                                >
+                                                <span class="px-3 py-1 rounded-full text-sm font-medium border-2 transition-all duration-200 select-none interest-span
+                                                    @if(in_array($interest->id, $customer_interests))
+                                                        text-white
+                                                    @else
+                                                        text-gray-700 hover:border-gray-400
+                                                    @endif"
+                                                    style="@if(in_array($interest->id, $customer_interests))
+                                                        background-color: {{ $interest->color }}; border-color: {{ $interest->color }};
+                                                    @else
+                                                        border-color: #d1d5db;
+                                                    @endif">
+                                                    {{ $interest->name }}
+                                                </span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <p class="text-xs text-gray-500">Select multiple interests that apply to this customer</p>
+                                    @if(count($customer_interests) > 0)
+                                        <div class="text-xs text-blue-600">
+                                            Selected: {{ count($customer_interests) }} interest(s)
+                                        </div>
+                                    @endif
+
+                                    {{-- Debug info --}}
+                                    @if(config('app.debug'))
+                                        <div class="text-xs text-gray-400 mt-1">
+                                            Debug: {{ json_encode($customer_interests) }}
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
 
                             <!-- Age Group -->
@@ -410,15 +453,15 @@
                                     wire:model="age_group"
                                     class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                 >
-                                    <option value="">--Select--</option>
-                                    @foreach($ageGroups as $key => $label)
-                                        <option value="{{ $key }}">{{ $label }}</option>
+                                    <option value="">Select Age Group</option>
+                                    @foreach($ageGroups as $value => $label)
+                                        <option value="{{ $value }}">{{ $label }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <!-- Remarks -->
-                            <div class="md:col-span-2">
+                            <div>
                                 <label for="remarks" class="block text-sm font-medium text-gray-700 mb-2">
                                     Remarks
                                 </label>
@@ -427,7 +470,7 @@
                                     wire:model="remarks"
                                     rows="3"
                                     class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="Additional notes or remarks"
+                                    placeholder="Additional notes about the customer"
                                 ></textarea>
                             </div>
                         </div>
@@ -868,5 +911,78 @@
             -webkit-appearance: none;
             -moz-appearance: textfield;
         }
+
+        /* Interest tag styles */
+        .interest-tag {
+            transition: transform 0.1s ease;
+        }
+
+        .interest-tag:hover {
+            transform: scale(1.02);
+        }
+
+        .interest-tag:active {
+            transform: scale(0.98);
+        }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enhanced interest selection
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.interest-tag')) {
+                    const tag = e.target.closest('.interest-tag');
+                    const checkbox = tag.querySelector('.interest-checkbox');
+                    const span = tag.querySelector('.interest-span');
+                    const interestId = tag.dataset.interestId;
+                    const interestColor = tag.dataset.interestColor;
+
+                    // Toggle checkbox
+                    checkbox.checked = !checkbox.checked;
+
+                    // Trigger Livewire update
+                    checkbox.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    // Update visual state immediately for better UX
+                    if (checkbox.checked) {
+                        span.style.backgroundColor = interestColor;
+                        span.style.borderColor = interestColor;
+                        span.style.color = 'white';
+                        span.classList.remove('text-gray-700', 'hover:border-gray-400');
+                        span.classList.add('text-white');
+                    } else {
+                        span.style.backgroundColor = '';
+                        span.style.borderColor = '#d1d5db';
+                        span.style.color = '';
+                        span.classList.remove('text-white');
+                        span.classList.add('text-gray-700', 'hover:border-gray-400');
+                    }
+                }
+            });
+        });
+
+        // Listen for Livewire updates to refresh interest states
+        document.addEventListener('livewire:updated', function() {
+            // Update interest tag states after Livewire updates
+            document.querySelectorAll('.interest-tag').forEach(function(tag) {
+                const checkbox = tag.querySelector('.interest-checkbox');
+                const span = tag.querySelector('.interest-span');
+                const interestColor = tag.dataset.interestColor;
+
+                if (checkbox.checked) {
+                    span.style.backgroundColor = interestColor;
+                    span.style.borderColor = interestColor;
+                    span.style.color = 'white';
+                    span.classList.remove('text-gray-700', 'hover:border-gray-400');
+                    span.classList.add('text-white');
+                } else {
+                    span.style.backgroundColor = '';
+                    span.style.borderColor = '#d1d5db';
+                    span.style.color = '';
+                    span.classList.remove('text-white');
+                    span.classList.add('text-gray-700', 'hover:border-gray-400');
+                }
+            });
+        });
+    </script>
 </div>

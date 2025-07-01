@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Leads;
 
+use App\Models\Activity;
 use App\Models\Campaign;
 use App\Models\Customer;
+use App\Models\Interest;
 use App\Models\Lead;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +26,7 @@ class LeadForm extends Component
     public $address = '';
     public $company = '';
     public $customer_location = '';
-    public $customer_interest = '';
+    public $customer_interests = [];
     public $age_group = '';
     public $phone = '';
     public $location = '';
@@ -84,6 +86,9 @@ class LeadForm extends Component
 
     public function mount($lead = null)
     {
+        // Initialize customer_interests as empty array
+        $this->customer_interests = [];
+
         // Handle both Lead model and leadId parameter
         if ($lead instanceof Lead) {
             $this->leadId = $lead->id;
@@ -151,7 +156,7 @@ class LeadForm extends Component
         try {
             $this->validate(['mobile' => 'required|regex:/^[0-9]{10}$/']);
 
-            $customer = Customer::where('mobile', '+91' . $this->mobile)->first();
+            $customer = Customer::with('interests')->where('mobile', '+91' . $this->mobile)->first();
 
             if ($customer) {
                 $this->existingCustomer = $customer;
@@ -165,7 +170,17 @@ class LeadForm extends Component
                 $this->email = $customer->email ?? '';
                 $this->address = $customer->address ?? '';
                 $this->company = $customer->company ?? '';
-                $this->customer_interest = $customer->interests ?? '';
+                // Handle both string interests (legacy) and relationship interests
+                if (is_string($customer->interests)) {
+                    // Legacy string interests - try to match with existing interests by name
+                    $interestNames = array_map('trim', explode(',', $customer->interests));
+                    $matchedInterests = Interest::whereIn('name', $interestNames)->pluck('id')->toArray();
+                    $this->customer_interests = $matchedInterests;
+                } elseif ($customer->relationLoaded('interests') && $customer->interests instanceof \Illuminate\Database\Eloquent\Collection) {
+                    $this->customer_interests = $customer->interests->pluck('id')->toArray();
+                } else {
+                    $this->customer_interests = [];
+                }
                 $this->phone = $customer->phone ?? '';
                 $this->remarks = $customer->notes ?? '';
             } else {
@@ -184,7 +199,7 @@ class LeadForm extends Component
     {
         $this->validate(['mobile' => 'required|regex:/^[0-9]{10}$/']);
 
-        $customer = Customer::where('mobile', '+91' . $this->mobile)->first();
+        $customer = Customer::with('interests')->where('mobile', '+91' . $this->mobile)->first();
 
         if ($customer) {
             $this->existingCustomer = $customer;
@@ -198,7 +213,17 @@ class LeadForm extends Component
             $this->email = $customer->email ?? '';
             $this->address = $customer->address ?? '';
             $this->company = $customer->company ?? '';
-            $this->customer_interest = $customer->interests ?? '';
+            // Handle both string interests (legacy) and relationship interests
+            if (is_string($customer->interests)) {
+                // Legacy string interests - try to match with existing interests by name
+                $interestNames = array_map('trim', explode(',', $customer->interests));
+                $matchedInterests = Interest::whereIn('name', $interestNames)->pluck('id')->toArray();
+                $this->customer_interests = $matchedInterests;
+            } elseif ($customer->relationLoaded('interests') && $customer->interests instanceof \Illuminate\Database\Eloquent\Collection) {
+                $this->customer_interests = $customer->interests->pluck('id')->toArray();
+            } else {
+                $this->customer_interests = [];
+            }
             $this->phone = $customer->phone ?? '';
             $this->remarks = $customer->notes ?? '';
 
@@ -262,7 +287,7 @@ class LeadForm extends Component
                 'email' => $this->email,
                 'address' => $this->address,
                 'company' => $this->company,
-                'interests' => $this->customer_interest,
+                'interests' => !empty($this->customer_interests) ? implode(', ', Interest::whereIn('id', $this->customer_interests)->pluck('name')->toArray()) : '',
                 'notes' => $this->remarks,
                 'branch_id' => auth()->user()?->branch_id ?? 1,
                 'created_by' => auth()->id(),
@@ -273,6 +298,13 @@ class LeadForm extends Component
                 $customer->update($customerData);
             } else {
                 $customer = Customer::create($customerData);
+            }
+
+            // Sync interests
+            if (!empty($this->customer_interests) && is_array($this->customer_interests)) {
+                $customer->interests()->sync($this->customer_interests);
+            } else {
+                $customer->interests()->sync([]);
             }
 
             // Create or update lead
@@ -295,9 +327,31 @@ class LeadForm extends Component
             if ($this->leadId) {
                 $lead = Lead::findOrFail($this->leadId);
                 $lead->update($leadData);
+
+                // Create activity for lead update
+                Activity::createFor(
+                    $lead,
+                    'note',
+                    'Lead Updated',
+                    "Lead '{$lead->title}' was updated by " . auth()->user()->name,
+                    auth()->id(),
+                    $lead->branch_id
+                );
+
                 session()->flash('message', 'Lead updated successfully!');
             } else {
-                Lead::create($leadData);
+                $lead = Lead::create($leadData);
+
+                // Create activity for lead creation
+                Activity::createFor(
+                    $lead,
+                    'note',
+                    'Lead Created',
+                    "New lead '{$lead->title}' was created by " . auth()->user()->name,
+                    auth()->id(),
+                    $lead->branch_id
+                );
+
                 session()->flash('message', 'Lead created successfully!');
             }
 
@@ -311,7 +365,7 @@ class LeadForm extends Component
 
     private function loadLead()
     {
-        $lead = Lead::with('customer')->findOrFail($this->leadId);
+        $lead = Lead::with('customer.interests')->findOrFail($this->leadId);
 
         // Load customer data
         if ($lead->customer) {
@@ -322,7 +376,17 @@ class LeadForm extends Component
             $this->email = $lead->customer->email ?? '';
             $this->address = $lead->customer->address ?? '';
             $this->company = $lead->customer->company ?? '';
-            $this->customer_interest = $lead->customer->interests ?? '';
+            // Handle both string interests (legacy) and relationship interests
+            if (is_string($lead->customer->interests)) {
+                // Legacy string interests - try to match with existing interests by name
+                $interestNames = array_map('trim', explode(',', $lead->customer->interests));
+                $matchedInterests = Interest::whereIn('name', $interestNames)->pluck('id')->toArray();
+                $this->customer_interests = $matchedInterests;
+            } elseif ($lead->customer->relationLoaded('interests') && $lead->customer->interests instanceof \Illuminate\Database\Eloquent\Collection) {
+                $this->customer_interests = $lead->customer->interests->pluck('id')->toArray();
+            } else {
+                $this->customer_interests = [];
+            }
             $this->phone = $lead->customer->phone ?? '';
             $this->remarks = $lead->customer->notes ?? '';
             $this->existingCustomer = $lead->customer;
@@ -351,6 +415,7 @@ class LeadForm extends Component
         return view('livewire.leads.lead-form', [
             'campaigns' => Campaign::where('branch_id', auth()->user()->branch_id)->get(),
             'users' => User::where('branch_id', auth()->user()->branch_id)->get(),
+            'interests' => Interest::active()->ordered()->get(),
             'leadSources' => [
                 'walk_in' => 'Walk In',
                 'referral' => 'Referral',

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\Auth;
 
 class Activity extends Model
 {
@@ -199,6 +200,29 @@ class Activity extends Model
         return $query->whereBetween('scheduled_at', [
             now()->startOfMonth(),
             now()->endOfMonth()
+        ]);
+    }
+
+    /**
+     * Create an activity for a related model
+     */
+    public static function createFor($relatedModel, string $type, string $subject, string $description = null, $userId = null, $branchId = null): self
+    {
+        $user = Auth::user();
+        $userId = $userId ?? $user?->id;
+        $branchId = $branchId ?? $user?->branch_id;
+
+        return self::create([
+            'type' => $type,
+            'subject' => $subject,
+            'description' => $description,
+            'status' => 'completed',
+            'completed_at' => now(),
+            'outcome' => 'successful',
+            'related_type' => get_class($relatedModel),
+            'related_id' => $relatedModel->id,
+            'user_id' => $userId,
+            'branch_id' => $branchId,
         ]);
     }
 }

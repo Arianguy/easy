@@ -50,7 +50,7 @@ class CustomersList extends Component
     public function render()
     {
         $query = Customer::query()
-            ->with(['branch'])
+            ->with(['branch', 'interests'])
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('name', 'like', '%' . $this->search . '%')
