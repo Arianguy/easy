@@ -11,12 +11,12 @@ class BranchSeeder extends Seeder
     {
         $branches = [
             [
-                'name' => 'Downtown Branch',
-                'location' => 'Downtown District',
-                'email' => 'downtown@company.com',
-                'phone_no' => '+1-555-0101',
-                'address' => '123 Main Street, Downtown, City 12345',
-                'manager_name' => 'John Smith',
+                'name' => 'Calicut Branch',
+                'location' => 'Calicut District',
+                'email' => 'calicut@easystore.com',
+                'phone_no' => '+91421235689',
+                'address' => 'Calicut, Kerala, India',
+                'manager_name' => 'Nishad LLM',
                 'is_active' => true,
             ]
         ];
