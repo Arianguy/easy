@@ -4,9 +4,11 @@
 
         <flux:spacer />
 
-        <flux:button :href="route('opportunities.create')" wire:navigate icon="plus">
-            Add Opportunity
-        </flux:button>
+        @if(auth()->user()->can('create opportunities'))
+            <flux:button :href="route('opportunities.create')" wire:navigate icon="plus">
+                Add Opportunity
+            </flux:button>
+        @endif
     </flux:header>
 
     <div class="space-y-6">
@@ -46,7 +48,9 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Stage</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Probability</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Expected Close</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            @if(auth()->user()->can('edit opportunities'))
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -81,11 +85,10 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                    ${{ number_format($opportunity->value, 2) }}
-                                    @if($opportunity->stage !== 'won' && $opportunity->stage !== 'lost')
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">
-                                            Weighted: ${{ number_format($opportunity->weighted_value, 2) }}
-                                        </div>
+                                    @if($opportunity->value)
+                                        ₹{{ number_format($opportunity->value, 2) }}
+                                    @else
+                                        <span class="text-gray-400 dark:text-gray-500">-</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4">
@@ -117,43 +120,45 @@
                                         <span class="text-gray-400 dark:text-gray-500">-</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-2">
-                                        <flux:button
-                                            :href="route('opportunities.edit', $opportunity)"
-                                            variant="ghost"
-                                            size="sm"
-                                            wire:navigate
-                                        >
-                                            Edit
-                                        </flux:button>
+                                @if(auth()->user()->can('edit opportunities'))
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-2">
+                                            <flux:button
+                                                :href="route('opportunities.edit', $opportunity)"
+                                                variant="ghost"
+                                                size="sm"
+                                                wire:navigate
+                                            >
+                                                Edit
+                                            </flux:button>
 
-                                        @if($opportunity->stage !== 'won' && $opportunity->stage !== 'lost')
-                                            <flux:button
-                                                wire:click="markAsWon({{ $opportunity->id }})"
-                                                variant="ghost"
-                                                size="sm"
-                                                color="green"
-                                                wire:confirm="Mark this opportunity as won?"
-                                            >
-                                                Won
-                                            </flux:button>
-                                            <flux:button
-                                                wire:click="markAsLost({{ $opportunity->id }})"
-                                                variant="ghost"
-                                                size="sm"
-                                                color="red"
-                                                wire:confirm="Mark this opportunity as lost?"
-                                            >
-                                                Lost
-                                            </flux:button>
-                                        @endif
-                                    </div>
-                                </td>
+                                            @if($opportunity->stage !== 'won' && $opportunity->stage !== 'lost')
+                                                <flux:button
+                                                    wire:click="markAsWon({{ $opportunity->id }})"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    color="green"
+                                                    wire:confirm="Mark this opportunity as won?"
+                                                >
+                                                    Won
+                                                </flux:button>
+                                                <flux:button
+                                                    wire:click="markAsLost({{ $opportunity->id }})"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    color="red"
+                                                    wire:confirm="Mark this opportunity as lost?"
+                                                >
+                                                    Lost
+                                                </flux:button>
+                                            @endif
+                                        </div>
+                                    </td>
+                                @endif
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="{{ auth()->user()->can('edit opportunities') ? '7' : '6' }}" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                     @if($search)
                                         No opportunities found matching "{{ $search }}"
                                     @else
@@ -213,13 +218,12 @@
                         <div>
                             <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Value</div>
                             <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                ${{ number_format($opportunity->value, 0) }}
+                                @if($opportunity->value)
+                                    ₹{{ number_format($opportunity->value, 0) }}
+                                @else
+                                    <span class="text-gray-400 dark:text-gray-500">-</span>
+                                @endif
                             </div>
-                            @if($opportunity->stage !== 'won' && $opportunity->stage !== 'lost')
-                                <div class="text-xs text-gray-500 dark:text-gray-400">
-                                    Weighted: ${{ number_format($opportunity->weighted_value, 0) }}
-                                </div>
-                            @endif
                         </div>
                         <div>
                             <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Probability</div>
@@ -256,40 +260,42 @@
                     @endif
 
                     <!-- Actions -->
-                    <div class="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center gap-2">
-                            <flux:button
-                                :href="route('opportunities.edit', $opportunity)"
-                                variant="ghost"
-                                size="sm"
-                                wire:navigate
-                            >
-                                Edit
-                            </flux:button>
-                        </div>
-                        @if($opportunity->stage !== 'won' && $opportunity->stage !== 'lost')
+                    @if(auth()->user()->can('edit opportunities'))
+                        <div class="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
                             <div class="flex items-center gap-2">
                                 <flux:button
-                                    wire:click="markAsWon({{ $opportunity->id }})"
+                                    :href="route('opportunities.edit', $opportunity)"
                                     variant="ghost"
                                     size="sm"
-                                    color="green"
-                                    wire:confirm="Mark this opportunity as won?"
+                                    wire:navigate
                                 >
-                                    Won
-                                </flux:button>
-                                <flux:button
-                                    wire:click="markAsLost({{ $opportunity->id }})"
-                                    variant="ghost"
-                                    size="sm"
-                                    color="red"
-                                    wire:confirm="Mark this opportunity as lost?"
-                                >
-                                    Lost
+                                    Edit
                                 </flux:button>
                             </div>
-                        @endif
-                    </div>
+                            @if($opportunity->stage !== 'won' && $opportunity->stage !== 'lost')
+                                <div class="flex items-center gap-2">
+                                    <flux:button
+                                        wire:click="markAsWon({{ $opportunity->id }})"
+                                        variant="ghost"
+                                        size="sm"
+                                        color="green"
+                                        wire:confirm="Mark this opportunity as won?"
+                                    >
+                                        Won
+                                    </flux:button>
+                                    <flux:button
+                                        wire:click="markAsLost({{ $opportunity->id }})"
+                                        variant="ghost"
+                                        size="sm"
+                                        color="red"
+                                        wire:confirm="Mark this opportunity as lost?"
+                                    >
+                                        Lost
+                                    </flux:button>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             @empty
                 <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">

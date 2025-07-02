@@ -31,6 +31,12 @@ class CustomersList extends Component
 
     public function toggleStatus($customerId)
     {
+        // Check permissions first
+        if (!Auth::user()->can('edit customers')) {
+            session()->flash('error', 'You do not have permission to edit customers.');
+            return;
+        }
+
         $customer = Customer::findOrFail($customerId);
 
         // Check if user can modify this customer

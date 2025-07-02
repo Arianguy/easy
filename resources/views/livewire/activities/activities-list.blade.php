@@ -4,9 +4,11 @@
 
         <flux:spacer />
 
-        <flux:button :href="route('activities.create')" wire:navigate icon="plus">
-            Add Activity
-        </flux:button>
+        @if(auth()->user()->can('create activities'))
+            <flux:button :href="route('activities.create')" wire:navigate icon="plus">
+                Add Activity
+            </flux:button>
+        @endif
     </flux:header>
 
     <div class="space-y-6">
@@ -98,7 +100,9 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Scheduled</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assigned To</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            @if(auth()->user()->can('edit activities'))
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -157,46 +161,53 @@
                                 <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                     {{ $activity->user->name }}
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-2">
-                                        <flux:button
-                                            :href="route('activities.edit', $activity)"
-                                            variant="ghost"
-                                            size="sm"
-                                            wire:navigate
-                                        >
-                                            Edit
-                                        </flux:button>
-                                        @if($activity->status === 'pending')
-                                            <flux:button
-                                                wire:click="markAsCompleted({{ $activity->id }}, 'successful')"
-                                                variant="ghost"
-                                                size="sm"
-                                                color="green"
-                                                wire:confirm="Mark this activity as completed?"
-                                            >
-                                                Complete
-                                            </flux:button>
-                                            <flux:button
-                                                wire:click="markAsCancelled({{ $activity->id }})"
-                                                variant="ghost"
-                                                size="sm"
-                                                color="red"
-                                                wire:confirm="Cancel this activity?"
-                                            >
-                                                Cancel
-                                            </flux:button>
-                                        @endif
-                                    </div>
-                                </td>
+                                @if(auth()->user()->can('edit activities'))
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-2">
+                                            @if(auth()->user()->canManageAllBranches() || $activity->user_id === auth()->user()->id)
+                                                <flux:button
+                                                    :href="route('activities.edit', $activity)"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    wire:navigate
+                                                >
+                                                    Edit
+                                                </flux:button>
+                                            @endif
+                                            @if($activity->status === 'pending' && (auth()->user()->canManageAllBranches() || $activity->user_id === auth()->user()->id))
+                                                <flux:button
+                                                    wire:click="markAsCompleted({{ $activity->id }}, 'successful')"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    color="green"
+                                                    wire:confirm="Mark this activity as completed?"
+                                                >
+                                                    Complete
+                                                </flux:button>
+                                                <flux:button
+                                                    wire:click="markAsCancelled({{ $activity->id }})"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    color="red"
+                                                    wire:confirm="Cancel this activity?"
+                                                >
+                                                    Cancel
+                                                </flux:button>
+                                            @endif
+                                        </div>
+                                    </td>
+                                @endif
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="{{ auth()->user()->can('edit activities') ? '7' : '6' }}" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                     @if($search)
                                         No activities found matching "{{ $search }}"
                                     @else
-                                        No activities found. <flux:link :href="route('activities.create')" wire:navigate class="text-blue-600 hover:underline">Create your first activity</flux:link>
+                                        No activities found.
+                                        @if(auth()->user()->can('create activities'))
+                                            <flux:link :href="route('activities.create')" wire:navigate class="text-blue-600 hover:underline">Create your first activity</flux:link>
+                                        @endif
                                     @endif
                                 </td>
                             </tr>
@@ -282,40 +293,47 @@
                     @endif
 
                     <!-- Actions -->
-                    <div class="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center gap-2">
-                            <flux:button
-                                :href="route('activities.edit', $activity)"
-                                variant="ghost"
-                                size="sm"
-                                wire:navigate
-                            >
-                                Edit
-                            </flux:button>
-                        </div>
-                        @if($activity->status === 'pending')
+                    @if(auth()->user()->can('edit activities') && (
+                        (auth()->user()->canManageAllBranches() || $activity->user_id === auth()->user()->id) ||
+                        ($activity->status === 'pending' && (auth()->user()->canManageAllBranches() || $activity->user_id === auth()->user()->id))
+                    ))
+                        <div class="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
                             <div class="flex items-center gap-2">
-                                <flux:button
-                                    wire:click="markAsCompleted({{ $activity->id }}, 'successful')"
-                                    variant="ghost"
-                                    size="sm"
-                                    color="green"
-                                    wire:confirm="Mark this activity as completed?"
-                                >
-                                    Complete
-                                </flux:button>
-                                <flux:button
-                                    wire:click="markAsCancelled({{ $activity->id }})"
-                                    variant="ghost"
-                                    size="sm"
-                                    color="red"
-                                    wire:confirm="Cancel this activity?"
-                                >
-                                    Cancel
-                                </flux:button>
+                                @if(auth()->user()->canManageAllBranches() || $activity->user_id === auth()->user()->id)
+                                    <flux:button
+                                        :href="route('activities.edit', $activity)"
+                                        variant="ghost"
+                                        size="sm"
+                                        wire:navigate
+                                    >
+                                        Edit
+                                    </flux:button>
+                                @endif
                             </div>
-                        @endif
-                    </div>
+                            @if($activity->status === 'pending' && (auth()->user()->canManageAllBranches() || $activity->user_id === auth()->user()->id))
+                                <div class="flex items-center gap-2">
+                                    <flux:button
+                                        wire:click="markAsCompleted({{ $activity->id }}, 'successful')"
+                                        variant="ghost"
+                                        size="sm"
+                                        color="green"
+                                        wire:confirm="Mark this activity as completed?"
+                                    >
+                                        Complete
+                                    </flux:button>
+                                    <flux:button
+                                        wire:click="markAsCancelled({{ $activity->id }})"
+                                        variant="ghost"
+                                        size="sm"
+                                        color="red"
+                                        wire:confirm="Cancel this activity?"
+                                    >
+                                        Cancel
+                                    </flux:button>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             @empty
                 <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
@@ -323,7 +341,10 @@
                         @if($search)
                             No activities found matching "{{ $search }}"
                         @else
-                            No activities found. <flux:link :href="route('activities.create')" wire:navigate class="text-blue-600 hover:underline">Create your first activity</flux:link>
+                            No activities found.
+                            @if(auth()->user()->can('create activities'))
+                                <flux:link :href="route('activities.create')" wire:navigate class="text-blue-600 hover:underline">Create your first activity</flux:link>
+                            @endif
                         @endif
                     </div>
                 </div>

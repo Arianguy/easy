@@ -186,13 +186,13 @@
                         <div>
                             <span class="text-blue-700 dark:text-blue-300">Opportunity Value:</span>
                             <span class="font-semibold text-blue-900 dark:text-blue-100 ml-2">
-                                ${{ number_format($value, 2) }}
+                                ₹{{ number_format($value, 2) }}
                             </span>
                         </div>
                         <div>
                             <span class="text-blue-700 dark:text-blue-300">Weighted Value:</span>
                             <span class="font-semibold text-blue-900 dark:text-blue-100 ml-2">
-                                ${{ number_format(($value * $probability) / 100, 2) }}
+                                ₹{{ number_format(($value * $probability) / 100, 2) }}
                             </span>
                         </div>
                     </div>

@@ -58,16 +58,20 @@ class ActivityForm extends Component
             $this->activity = Activity::findOrFail($activity);
             $this->isEditing = true;
 
-            // Check permissions
-            if (!$user->hasRole('Area Manager') && $this->activity->user_id !== $user->id) {
-                abort(403, 'You can only edit your own activities.');
+            // Check permissions - Allow editing if user has edit activities permission
+            // and either they own the activity OR they can manage all branches (Area Manager)
+            if (
+                !$user->can('edit activities') ||
+                (!$user->canManageAllBranches() && $this->activity->user_id !== $user->id)
+            ) {
+                abort(403, 'You do not have permission to edit this activity.');
             }
 
             $this->fill($this->activity->toArray());
             $this->scheduled_at = $this->activity->scheduled_at?->format('Y-m-d\TH:i');
         } else {
             // Set defaults for new activity
-            $this->branch_id = $user->hasRole('Area Manager') ? null : $user->branch_id;
+            $this->branch_id = $user->canManageAllBranches() ? null : $user->branch_id;
 
             // If creating from a related model, pre-fill the relationship
             $relatedType = request()->query('related_type');
@@ -106,13 +110,15 @@ class ActivityForm extends Component
             $user = Auth::user();
 
             // Check permissions for editing
-            if ($this->isEditing && !$user->hasRole('Area Manager') && $this->activity->user_id !== $user->id) {
-                session()->flash('error', 'You can only edit your own activities.');
+            if ($this->isEditing && (!$user->can('edit activities') ||
+                (!$user->canManageAllBranches() && $this->activity->user_id !== $user->id))) {
+                session()->flash('error', 'You do not have permission to edit this activity.');
                 return;
             }
 
             // Check permissions for creating
-            if (!$this->isEditing && !$user->hasRole('Area Manager') && $this->branch_id !== $user->branch_id) {
+            if (!$this->isEditing && (!$user->can('create activities') ||
+                (!$user->canManageAllBranches() && $this->branch_id !== $user->branch_id))) {
                 session()->flash('error', 'You can only create activities in your branch.');
                 return;
             }
@@ -153,14 +159,14 @@ class ActivityForm extends Component
     public function render()
     {
         $user = Auth::user();
-        $branches = $user->hasRole('Area Manager')
+        $branches = $user->canManageAllBranches()
             ? Branch::all()
             : Branch::where('id', $user->branch_id)->get();
 
         // Get related models for dropdown
         $leads = Lead::select('id', 'title', 'customer_id')
             ->with('customer:id,name')
-            ->when(!$user->hasRole('Area Manager'), function ($q) use ($user) {
+            ->when(!$user->canManageAllBranches(), function ($q) use ($user) {
                 return $q->where('branch_id', $user->branch_id);
             })
             ->latest()
@@ -169,7 +175,7 @@ class ActivityForm extends Component
 
         $opportunities = Opportunity::select('id', 'name', 'lead_id')
             ->with('lead.customer:id,name')
-            ->when(!$user->hasRole('Area Manager'), function ($q) use ($user) {
+            ->when(!$user->canManageAllBranches(), function ($q) use ($user) {
                 return $q->where('branch_id', $user->branch_id);
             })
             ->latest()
@@ -177,7 +183,7 @@ class ActivityForm extends Component
             ->get();
 
         $customers = Customer::select('id', 'name', 'company')
-            ->when(!$user->hasRole('Area Manager'), function ($q) use ($user) {
+            ->when(!$user->canManageAllBranches(), function ($q) use ($user) {
                 return $q->where('branch_id', $user->branch_id);
             })
             ->latest()

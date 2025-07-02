@@ -31,6 +31,12 @@ class OpportunitiesList extends Component
 
     public function markAsWon($opportunityId)
     {
+        // Check permissions first
+        if (!Auth::user()->can('edit opportunities')) {
+            session()->flash('error', 'You do not have permission to edit opportunities.');
+            return;
+        }
+
         $opportunity = Opportunity::findOrFail($opportunityId);
 
         // Check if user can modify this opportunity
@@ -46,6 +52,12 @@ class OpportunitiesList extends Component
 
     public function markAsLost($opportunityId)
     {
+        // Check permissions first
+        if (!Auth::user()->can('edit opportunities')) {
+            session()->flash('error', 'You do not have permission to edit opportunities.');
+            return;
+        }
+
         $opportunity = Opportunity::findOrFail($opportunityId);
 
         // Check if user can modify this opportunity

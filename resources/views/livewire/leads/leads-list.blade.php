@@ -4,9 +4,11 @@
 
         <flux:spacer />
 
-        <flux:button :href="route('leads.create')" wire:navigate icon="plus">
-            Add Lead
-        </flux:button>
+        @if(auth()->user()->can('create leads'))
+            <flux:button :href="route('leads.create')" wire:navigate icon="plus">
+                Add Lead
+            </flux:button>
+        @endif
     </flux:header>
 
     <div class="space-y-6">
@@ -143,7 +145,9 @@
                                     @endif
                                 </div>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            @if(auth()->user()->can('edit leads') || auth()->user()->can('delete leads'))
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -194,48 +198,54 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                     @if($lead->estimated_value)
-                                        ${{ number_format($lead->estimated_value, 2) }}
+                                        ₹{{ number_format($lead->estimated_value, 2) }}
                                     @else
                                         <span class="text-gray-400 dark:text-gray-500">-</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-2">
-                                        <flux:button
-                                            :href="route('leads.edit', $lead)"
-                                            variant="ghost"
-                                            size="sm"
-                                            wire:navigate
-                                        >
-                                            Edit
-                                        </flux:button>
+                                @if(auth()->user()->can('edit leads') || auth()->user()->can('delete leads'))
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-2">
+                                            @if(auth()->user()->can('edit leads'))
+                                                <flux:button
+                                                    :href="route('leads.edit', $lead)"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    wire:navigate
+                                                >
+                                                    Edit
+                                                </flux:button>
 
-                                        @if($lead->status !== 'converted')
-                                            <flux:button
-                                                wire:click="convertToOpportunity({{ $lead->id }})"
-                                                variant="ghost"
-                                                size="sm"
-                                                color="green"
-                                            >
-                                                Convert
-                                            </flux:button>
-                                        @endif
+                                                @if($lead->status !== 'converted')
+                                                    <flux:button
+                                                        wire:click="convertToOpportunity({{ $lead->id }})"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        color="green"
+                                                    >
+                                                        Convert
+                                                    </flux:button>
+                                                @endif
+                                            @endif
 
-                                        <flux:button
-                                            wire:click="deleteLead({{ $lead->id }})"
-                                            variant="ghost"
-                                            size="sm"
-                                            color="red"
-                                            wire:confirm="Are you sure you want to delete this lead?"
-                                        >
-                                            Delete
-                                        </flux:button>
-                                    </div>
-                                </td>
+                                            @if(auth()->user()->can('delete leads'))
+                                                <flux:button
+                                                    wire:click="deleteLead({{ $lead->id }})"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    color="red"
+                                                    wire:confirm="Are you sure you want to delete this lead?"
+                                                >
+                                                    Delete
+                                                </flux:button>
+                                            @endif
+                                        </div>
+                                    </td>
+                                @endif
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="{{ (auth()->user()->can('edit leads') || auth()->user()->can('delete leads')) ? '8' : '7' }}" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                     @if($search || $statusFilter || $priorityFilter || $assignedUserFilter)
                                         No leads found matching your criteria.
                                     @else
@@ -317,7 +327,7 @@
                             <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Value</dt>
                             <dd class="text-sm text-gray-900 dark:text-gray-100 mt-1">
                                 @if($lead->estimated_value)
-                                    ${{ number_format($lead->estimated_value, 2) }}
+                                    ₹{{ number_format($lead->estimated_value, 2) }}
                                 @else
                                     <span class="text-gray-400 dark:text-gray-500">Not set</span>
                                 @endif
@@ -347,40 +357,46 @@
                     </div>
 
                     <!-- Actions -->
-                    <div class="flex flex-wrap gap-2 pt-3 border-t border-gray-200 dark:border-gray-600">
-                        <flux:button
-                            :href="route('leads.edit', $lead)"
-                            variant="filled"
-                            size="sm"
-                            wire:navigate
-                            class="flex-1 sm:flex-none"
-                        >
-                            Edit
-                        </flux:button>
+                    @if(auth()->user()->can('edit leads') || auth()->user()->can('delete leads'))
+                        <div class="flex flex-wrap gap-2 pt-3 border-t border-gray-200 dark:border-gray-600">
+                            @if(auth()->user()->can('edit leads'))
+                                <flux:button
+                                    :href="route('leads.edit', $lead)"
+                                    variant="filled"
+                                    size="sm"
+                                    wire:navigate
+                                    class="flex-1 sm:flex-none"
+                                >
+                                    Edit
+                                </flux:button>
 
-                        @if($lead->status !== 'converted')
-                            <flux:button
-                                wire:click="convertToOpportunity({{ $lead->id }})"
-                                variant="filled"
-                                size="sm"
-                                color="green"
-                                class="flex-1 sm:flex-none"
-                            >
-                                Convert
-                            </flux:button>
-                        @endif
+                                @if($lead->status !== 'converted')
+                                    <flux:button
+                                        wire:click="convertToOpportunity({{ $lead->id }})"
+                                        variant="filled"
+                                        size="sm"
+                                        color="green"
+                                        class="flex-1 sm:flex-none"
+                                    >
+                                        Convert
+                                    </flux:button>
+                                @endif
+                            @endif
 
-                        <flux:button
-                            wire:click="deleteLead({{ $lead->id }})"
-                            variant="ghost"
-                            size="sm"
-                            color="red"
-                            wire:confirm="Are you sure you want to delete this lead?"
-                            class="flex-1 sm:flex-none"
-                        >
-                            Delete
-                        </flux:button>
-                    </div>
+                            @if(auth()->user()->can('delete leads'))
+                                <flux:button
+                                    wire:click="deleteLead({{ $lead->id }})"
+                                    variant="ghost"
+                                    size="sm"
+                                    color="red"
+                                    wire:confirm="Are you sure you want to delete this lead?"
+                                    class="flex-1 sm:flex-none"
+                                >
+                                    Delete
+                                </flux:button>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             @empty
                 <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">

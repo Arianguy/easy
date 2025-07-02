@@ -72,10 +72,16 @@
 
                     <div>
                         <flux:input
-                            wire:model="mobile"
+                            wire:model.live="mobile"
                             label="Mobile"
-                            placeholder="Enter mobile number"
+                            placeholder="+91 Enter 10-digit mobile number"
+                            required
                         />
+                        @if($mobileCheckMessage)
+                            <div class="mt-1 text-sm {{ $mobileExists ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400' }}">
+                                {{ $mobileCheckMessage }}
+                            </div>
+                        @endif
                         @error('mobile')
                             <div class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</div>
                         @enderror

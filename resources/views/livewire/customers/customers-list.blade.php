@@ -4,9 +4,11 @@
 
         <flux:spacer />
 
-        <flux:button :href="route('customers.create')" wire:navigate icon="plus">
-            Add Customer
-        </flux:button>
+        @if(auth()->user()->can('create customers'))
+            <flux:button :href="route('customers.create')" wire:navigate icon="plus">
+                Add Customer
+            </flux:button>
+        @endif
     </flux:header>
 
     <div class="space-y-6">
@@ -44,7 +46,9 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Interests</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            @if(auth()->user()->can('edit customers'))
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -106,30 +110,32 @@
                                 <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                     {{ $customer->created_at->format('M j, Y') }}
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-2">
-                                        <flux:button
-                                            :href="route('customers.edit', $customer)"
-                                            variant="ghost"
-                                            size="sm"
-                                            wire:navigate
-                                        >
-                                            Edit
-                                        </flux:button>
-                                        <flux:button
-                                            wire:click="toggleStatus({{ $customer->id }})"
-                                            variant="ghost"
-                                            size="sm"
-                                            :color="$customer->status === 'active' ? 'red' : 'green'"
-                                        >
-                                            {{ $customer->status === 'active' ? 'Deactivate' : 'Activate' }}
-                                        </flux:button>
-                                    </div>
-                                </td>
+                                @if(auth()->user()->can('edit customers'))
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-2">
+                                            <flux:button
+                                                :href="route('customers.edit', $customer)"
+                                                variant="ghost"
+                                                size="sm"
+                                                wire:navigate
+                                            >
+                                                Edit
+                                            </flux:button>
+                                            <flux:button
+                                                wire:click="toggleStatus({{ $customer->id }})"
+                                                variant="ghost"
+                                                size="sm"
+                                                :color="$customer->status === 'active' ? 'red' : 'green'"
+                                            >
+                                                {{ $customer->status === 'active' ? 'Deactivate' : 'Activate' }}
+                                            </flux:button>
+                                        </div>
+                                    </td>
+                                @endif
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="{{ auth()->user()->can('edit customers') ? '7' : '6' }}" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                     @if($search)
                                         No customers found matching "{{ $search }}"
                                     @else
@@ -219,24 +225,26 @@
                         <div class="text-xs text-gray-500 dark:text-gray-400">
                             Created {{ $customer->created_at->format('M j, Y') }}
                         </div>
-                        <div class="flex items-center gap-2">
-                            <flux:button
-                                :href="route('customers.edit', $customer)"
-                                variant="ghost"
-                                size="sm"
-                                wire:navigate
-                            >
-                                Edit
-                            </flux:button>
-                            <flux:button
-                                wire:click="toggleStatus({{ $customer->id }})"
-                                variant="ghost"
-                                size="sm"
-                                :color="$customer->status === 'active' ? 'red' : 'green'"
-                            >
-                                {{ $customer->status === 'active' ? 'Deactivate' : 'Activate' }}
-                            </flux:button>
-                        </div>
+                        @if(auth()->user()->can('edit customers'))
+                            <div class="flex items-center gap-2">
+                                <flux:button
+                                    :href="route('customers.edit', $customer)"
+                                    variant="ghost"
+                                    size="sm"
+                                    wire:navigate
+                                >
+                                    Edit
+                                </flux:button>
+                                <flux:button
+                                    wire:click="toggleStatus({{ $customer->id }})"
+                                    variant="ghost"
+                                    size="sm"
+                                    :color="$customer->status === 'active' ? 'red' : 'green'"
+                                >
+                                    {{ $customer->status === 'active' ? 'Deactivate' : 'Activate' }}
+                                </flux:button>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @empty

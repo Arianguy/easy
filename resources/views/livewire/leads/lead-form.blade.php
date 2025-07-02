@@ -6,12 +6,24 @@
             <div class="mb-8">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-900">Edit Lead</h1>
-                        <p class="text-gray-600 mt-1">Update lead information and customer details</p>
+                                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            {{ $this->isReadOnly() ? 'View Lead (Converted)' : 'Edit Lead' }}
+        </h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">
+            {{ $this->isReadOnly() ? 'This lead has been converted and cannot be modified' : 'Update lead information and customer details' }}
+        </p>
+                        @if($this->isReadOnly())
+                                    <div class="mt-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Converted Lead - Read Only
+        </div>
+                        @endif
                     </div>
                     <a href="{{ route('leads.index') }}"
                        wire:navigate
-                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                         </svg>
@@ -27,15 +39,15 @@
                         <!-- Step 1: Mobile -->
                         <div class="flex items-center">
                             <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                                {{ $step >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600' }}">
+                                {{ $step >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400' }}">
                                 1
                             </div>
-                            <span class="ml-2 text-sm font-medium {{ $step >= 1 ? 'text-blue-600' : 'text-gray-500' }}">
+                            <span class="ml-2 text-sm font-medium {{ $step >= 1 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400' }}">
                                 Mobile
                             </span>
                         </div>
 
-                        <div class="w-8 h-0.5 {{ $step >= 2 ? 'bg-blue-600' : 'bg-gray-200' }}"></div>
+                        <div class="w-8 h-0.5 {{ $step >= 2 ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700' }}"></div>
 
                         <!-- Step 2: Customer -->
                         <div class="flex items-center">
@@ -70,25 +82,25 @@
         <form wire:submit.prevent="save">
             <!-- Step 1: Mobile Number Input -->
             @if ($step == 1)
-                <div class="bg-white rounded-lg shadow-sm border p-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <div class="text-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Enter Mobile Number</h2>
-                        <p class="text-gray-600">We'll check if this customer already exists in our system</p>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Enter Mobile Number</h2>
+                        <p class="text-gray-600 dark:text-gray-400">We'll check if this customer already exists in our system</p>
                     </div>
 
                     <div class="max-w-md mx-auto">
-                        <label for="mobile" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="mobile" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Mobile Number <span class="text-red-500">*</span>
                         </label>
                                                 <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="text-gray-500 text-lg font-medium">+91</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-lg font-medium">+91</span>
                             </div>
                                                         <input
                                 type="tel"
                                 id="mobile"
                                 wire:model.live="mobile"
-                                class="block w-full pl-16 pr-4 py-3 text-lg border rounded-md text-center focus:outline-none focus:ring-2 focus:ring-offset-2 @error('mobile') border-red-300 focus:ring-red-500 focus:border-red-500 @else border-gray-300 focus:ring-blue-500 focus:border-blue-500 @enderror"
+                                class="block w-full pl-16 pr-4 py-3 text-lg border rounded-md text-center bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 @error('mobile') border-red-300 focus:ring-red-500 focus:border-red-500 @else border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 @enderror"
                                 placeholder="Enter 10 digit mobile number"
                                 inputmode="numeric"
                                 pattern="[0-9]*"
@@ -142,12 +154,12 @@
 
             <!-- Step 2: Customer Details -->
             @if ($step == 2)
-                <div class="bg-white rounded-lg shadow-sm border p-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <div class="mb-6">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-2">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                             {{ $mobileExists ? 'Existing Customer Details' : 'Customer Information' }}
                         </h2>
-                        <p class="text-gray-600">
+                        <p class="text-gray-600 dark:text-gray-400">
                             @if($mobileExists)
                                 Customer details are read-only for existing customers. Only lead details can be modified.
                             @else
@@ -158,7 +170,7 @@
 
                     @if($mobileExists)
                         <!-- Existing Customer Details Card -->
-                        <div class="bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 rounded-xl p-6">
+                        <div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-6">
                             <div class="flex items-center mb-4">
                                 <div class="flex-shrink-0">
                                     <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
@@ -168,16 +180,16 @@
                                     </div>
                                 </div>
                                 <div class="ml-4">
-                                    <h3 class="text-lg font-semibold text-gray-900">{{ trim($first_name . ' ' . $last_name) }}</h3>
-                                    <p class="text-sm text-gray-600">Existing Customer</p>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ trim($first_name . ' ' . $last_name) }}</h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Existing Customer</p>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-3">
                                     <div>
-                                        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile Number</label>
-                                        <p class="mt-1 text-sm font-semibold text-gray-900">+91 {{ $mobile }}</p>
+                                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Mobile Number</label>
+                                        <p class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">+91 {{ $mobile }}</p>
                                     </div>
 
                                     @if($phone)
@@ -499,24 +511,25 @@
             @if ($step == 3)
                 @if($leadId)
                     <!-- Edit Mode: Show Customer Info First -->
-                    <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
                         <div class="mb-6">
-                            <h2 class="text-xl font-bold text-gray-900 mb-2">Customer Information</h2>
-                            <p class="text-gray-600">Customer details for this lead</p>
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Customer Information</h2>
+                            <p class="text-gray-600 dark:text-gray-400">Customer details for this lead</p>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- First Name -->
                             <div>
-                                <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                <label for="first_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     First Name <span class="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     id="first_name"
                                     wire:model="first_name"
-                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md {{ $this->isReadOnly() ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500' }}"
                                     placeholder="First Name"
+                                    {{ $this->isReadOnly() ? 'readonly' : '' }}
                                 />
                                 @error('first_name')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -525,15 +538,16 @@
 
                             <!-- Last Name -->
                             <div>
-                                <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                <label for="last_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Last Name <span class="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     id="last_name"
                                     wire:model="last_name"
-                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md {{ $this->isReadOnly() ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500' }}"
                                     placeholder="Last Name"
+                                    {{ $this->isReadOnly() ? 'readonly' : '' }}
                                 />
                                 @error('last_name')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -542,18 +556,18 @@
 
                             <!-- Mobile (Read-only) -->
                             <div>
-                                <label for="mobile_display" class="block text-sm font-medium text-gray-700 mb-2">
+                                <label for="mobile_display" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Mobile Number
                                 </label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <span class="text-gray-500 font-medium">+91</span>
+                                        <span class="text-gray-500 dark:text-gray-400 font-medium">+91</span>
                                     </div>
                                     <input
                                         type="tel"
                                         id="mobile_display"
                                         value="{{ $mobile }}"
-                                        class="block w-full pl-12 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                                        class="block w-full pl-12 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                         readonly
                                     />
                                 </div>
@@ -561,15 +575,16 @@
 
                             <!-- Email -->
                             <div>
-                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Email
                                 </label>
                                 <input
                                     type="email"
                                     id="email"
                                     wire:model="email"
-                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md {{ $this->isReadOnly() ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500' }}"
                                     placeholder="Email Address"
+                                    {{ $this->isReadOnly() ? 'readonly' : '' }}
                                 />
                                 @error('email')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -578,28 +593,28 @@
 
                             <!-- Company -->
                             <div>
-                                <label for="company" class="block text-sm font-medium text-gray-700 mb-2">
+                                <label for="company" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Company
                                 </label>
                                 <input
                                     type="text"
                                     id="company"
                                     wire:model="company"
-                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="Company Name"
                                 />
                             </div>
 
                             <!-- Phone -->
                             <div>
-                                <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                                <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Phone Number
                                 </label>
                                 <input
                                     type="tel"
                                     id="phone"
                                     wire:model="phone"
-                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="Phone Number"
                                 />
                             </div>
@@ -607,12 +622,12 @@
                     </div>
                 @endif
 
-                <div class="bg-white rounded-lg shadow-sm border p-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                     <div class="mb-6">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-2">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                             {{ $leadId ? 'Lead Information' : 'Lead Information' }}
                         </h2>
-                        <p class="text-gray-600">
+                        <p class="text-gray-600 dark:text-gray-400">
                             {{ $leadId ? 'Update the lead details' : 'Complete the lead details' }}
                         </p>
                     </div>
@@ -620,15 +635,16 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Title -->
                         <div class="md:col-span-2">
-                            <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Lead Title <span class="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
                                 id="title"
                                 wire:model="title"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-md {{ $this->isReadOnly() ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : 'focus:ring-blue-500 focus:border-blue-500' }}"
                                 placeholder="Lead Title"
+                                {{ $this->isReadOnly() ? 'readonly' : '' }}
                             />
                             @error('title')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -637,13 +653,14 @@
 
                         <!-- Status -->
                         <div>
-                            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Status <span class="text-red-500">*</span>
                             </label>
                             <select
                                 id="status"
                                 wire:model="status"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md {{ $this->isReadOnly() ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500' }}"
+                                {{ $this->isReadOnly() ? 'disabled' : '' }}
                             >
                                 <option value="new">New</option>
                                 <option value="contacted">Contacted</option>
@@ -658,13 +675,14 @@
 
                         <!-- Priority -->
                         <div>
-                            <label for="priority" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Priority <span class="text-red-500">*</span>
                             </label>
                             <select
                                 id="priority"
                                 wire:model="priority"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md {{ $this->isReadOnly() ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500' }}"
+                                {{ $this->isReadOnly() ? 'disabled' : '' }}
                             >
                                 <option value="low">Low</option>
                                 <option value="medium">Medium</option>
@@ -677,13 +695,13 @@
 
                         <!-- Lead Source -->
                         <div>
-                            <label for="source" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="source" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Lead Source <span class="text-red-500">*</span>
                             </label>
                             <select
                                 id="source"
                                 wire:model="source"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
                             >
                                 <option value="">--Select--</option>
                                 @foreach($leadSources as $key => $label)
@@ -697,14 +715,14 @@
 
                         <!-- Follow-up Date -->
                         <div>
-                            <label for="follow_up_date" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="follow_up_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Follow-up Date <span class="text-red-500">*</span>
                             </label>
                             <input
                                 type="date"
                                 id="follow_up_date"
                                 wire:model="follow_up_date"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
                                 min="{{ date('Y-m-d') }}"
                             />
                             @error('follow_up_date')
@@ -714,13 +732,13 @@
 
                         <!-- Campaign -->
                         <div>
-                            <label for="campaign_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="campaign_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Campaign
                             </label>
                             <select
                                 id="campaign_id"
                                 wire:model="campaign_id"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
                             >
                                 <option value="">--Select--</option>
                                 @foreach($campaigns as $campaign)
@@ -731,13 +749,13 @@
 
                         <!-- Rating -->
                         <div>
-                            <label for="rating" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="rating" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Rating
                             </label>
                             <select
                                 id="rating"
                                 wire:model="rating"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
                             >
                                 <option value="">--Select--</option>
                                 @foreach($ratings as $key => $label)
@@ -748,14 +766,14 @@
 
                         <!-- Estimated Value -->
                         <div>
-                            <label for="estimated_value" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="estimated_value" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Estimated Value
                             </label>
                             <input
                                 type="number"
                                 id="estimated_value"
                                 wire:model="estimated_value"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="0.00"
                                 step="0.01"
                                 min="0"
@@ -767,14 +785,14 @@
 
                         <!-- Expected Close Date -->
                         <div>
-                            <label for="expected_close_date" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="expected_close_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Expected Close Date
                             </label>
                             <input
                                 type="date"
                                 id="expected_close_date"
                                 wire:model="expected_close_date"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
                                 min="{{ date('Y-m-d') }}"
                             />
                             @error('expected_close_date')
@@ -784,13 +802,13 @@
 
                         <!-- Assigned User -->
                         <div>
-                            <label for="assigned_user_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="assigned_user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Owner <span class="text-red-500">*</span>
                             </label>
                             <select
                                 id="assigned_user_id"
                                 wire:model="assigned_user_id"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
                             >
                                 <option value="">--Select--</option>
                                 @foreach($users as $user)
@@ -804,13 +822,13 @@
 
                         <!-- Member Type -->
                         <div>
-                            <label for="member_type" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="member_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Member Type
                             </label>
                             <select
                                 id="member_type"
                                 wire:model="member_type"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
                             >
                                 <option value="standard">Standard</option>
                                 <option value="premium">Premium</option>
@@ -820,29 +838,31 @@
 
                         <!-- Description -->
                         <div class="md:col-span-2">
-                            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Description
                             </label>
                             <textarea
                                 id="description"
                                 wire:model="description"
                                 rows="4"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md {{ $this->isReadOnly() ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500' }}"
                                 placeholder="Lead description and details"
+                                {{ $this->isReadOnly() ? 'readonly' : '' }}
                             ></textarea>
                         </div>
 
                         <!-- Notes -->
                         <div class="md:col-span-2">
-                            <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Notes
                             </label>
                             <textarea
                                 id="notes"
                                 wire:model="notes"
                                 rows="3"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md {{ $this->isReadOnly() ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500' }}"
                                 placeholder="Additional notes"
+                                {{ $this->isReadOnly() ? 'readonly' : '' }}
                             ></textarea>
                         </div>
                     </div>
@@ -851,7 +871,7 @@
                         @if($leadId)
                             <a href="{{ route('leads.index') }}"
                                wire:navigate
-                               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                               class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 Cancel
                             </a>
                         @else
@@ -863,12 +883,18 @@
                                 Back
                             </button>
                         @endif
-                        <button
-                            type="submit"
-                            class="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 font-medium"
-                        >
-                            {{ $leadId ? 'Update Lead' : 'Create Lead' }}
-                        </button>
+                        @if(!$this->isReadOnly())
+                            <button
+                                type="submit"
+                                class="bg-green-600 text-white py-2 px-6 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 font-medium"
+                            >
+                                {{ $leadId ? 'Update Lead' : 'Create Lead' }}
+                            </button>
+                        @else
+                            <div class="text-gray-500 text-sm italic">
+                                This lead has been converted and cannot be modified.
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endif

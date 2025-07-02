@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
 
         // Create Area Manager (can access all branches)
         $areaManager = User::create([
-            'name' => 'Area Manager',
+            'name' => 'Savio Fernandes',
             'email' => 'savio@ashtelgroup.com',
             'password' => Hash::make('Savio123'),
             'phone' => '+919822456789',

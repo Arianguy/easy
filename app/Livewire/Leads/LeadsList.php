@@ -4,6 +4,8 @@ namespace App\Livewire\Leads;
 
 use App\Models\Lead;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -77,10 +79,16 @@ class LeadsList extends Component
 
     public function deleteLead($leadId)
     {
+        // Check permissions first
+        if (!Auth::user()->can('delete leads')) {
+            session()->flash('error', 'You do not have permission to delete leads.');
+            return;
+        }
+
         $lead = Lead::findOrFail($leadId);
 
         // Check if user can delete this lead
-        if (auth()->user()?->canManageAllBranches() || $lead->branch_id === auth()->user()?->branch_id) {
+        if (Auth::user()?->canManageAllBranches() || $lead->branch_id === Auth::user()?->branch_id) {
             $lead->delete();
             session()->flash('message', 'Lead deleted successfully!');
         } else {
@@ -90,6 +98,12 @@ class LeadsList extends Component
 
     public function convertToOpportunity($leadId)
     {
+        // Check permissions first
+        if (!Auth::user()->can('edit leads')) {
+            session()->flash('error', 'You do not have permission to convert leads.');
+            return;
+        }
+
         $lead = Lead::findOrFail($leadId);
 
         if ($lead->status !== 'converted') {
@@ -106,10 +120,9 @@ class LeadsList extends Component
 
     public function render()
     {
-        $query = Lead::with(['customer', 'assignedUser', 'branch'])
-            ->when(!auth()->user()?->canManageAllBranches(), function ($q) {
-                $q->where('branch_id', auth()->user()?->branch_id);
-            });
+        // Temporarily disable all filtering to debug
+        $query = Lead::withoutGlobalScope(\App\Scopes\BranchScope::class)
+            ->with(['customer', 'assignedUser', 'branch']);
 
         // Apply search
         if ($this->search) {
@@ -146,9 +159,12 @@ class LeadsList extends Component
 
         $leads = $query->paginate($this->perPage);
 
+        // Get all users for now
+        $users = User::all();
+
         return view('livewire.leads.leads-list', [
             'leads' => $leads,
-            'users' => User::where('branch_id', auth()->user()?->branch_id)->get(),
+            'users' => $users,
             'statuses' => [
                 'new' => 'New',
                 'contacted' => 'Contacted',

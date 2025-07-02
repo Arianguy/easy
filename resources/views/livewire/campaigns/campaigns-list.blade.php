@@ -105,10 +105,10 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                     @if($campaign->budget)
-                                        <div>${{ number_format($campaign->budget, 0) }}</div>
+                                        <div>₹{{ number_format($campaign->budget, 0) }}</div>
                                         @if($campaign->actual_cost)
                                             <div class="text-xs">
-                                                Spent: ${{ number_format($campaign->actual_cost, 0) }}
+                                                Spent: ₹{{ number_format($campaign->actual_cost, 0) }}
                                                 ({{ $campaign->budget_utilization }}%)
                                             </div>
                                         @endif
@@ -222,11 +222,11 @@
                             <div class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Budget</div>
                             @if($campaign->budget)
                                 <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                    ${{ number_format($campaign->budget, 0) }}
+                                    ₹{{ number_format($campaign->budget, 0) }}
                                 </div>
                                 @if($campaign->actual_cost)
                                     <div class="text-xs text-gray-500 dark:text-gray-400">
-                                        Spent: ${{ number_format($campaign->actual_cost, 0) }} ({{ $campaign->budget_utilization }}%)
+                                        Spent: ₹{{ number_format($campaign->actual_cost, 0) }} ({{ $campaign->budget_utilization }}%)
                                     </div>
                                 @endif
                             @else

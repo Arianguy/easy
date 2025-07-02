@@ -53,6 +53,7 @@ class LeadForm extends Component
     public $mobileExists = false;
     public $mobileCheckMessage = '';
     public $mobileEditEnabled = false;
+    public $isConverted = false; // Add property to track if lead is converted
 
     protected $rules = [
         'mobile' => 'required|regex:/^[0-9]{10}$/',
@@ -274,8 +275,19 @@ class LeadForm extends Component
         }
     }
 
+    public function isReadOnly()
+    {
+        return $this->isConverted;
+    }
+
     public function save()
     {
+        // Prevent saving if lead is converted
+        if ($this->isConverted) {
+            session()->flash('error', 'Cannot modify a converted lead.');
+            return;
+        }
+
         $this->validate();
 
         try {
@@ -366,6 +378,9 @@ class LeadForm extends Component
     private function loadLead()
     {
         $lead = Lead::with('customer.interests')->findOrFail($this->leadId);
+
+        // Check if lead is converted
+        $this->isConverted = $lead->status === 'converted';
 
         // Load customer data
         if ($lead->customer) {

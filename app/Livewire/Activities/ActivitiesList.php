@@ -64,10 +64,10 @@ class ActivitiesList extends Component
     {
         $activity = Activity::findOrFail($activityId);
 
-        // Check permissions
+        // Check permissions - user must have edit activities permission AND either own the activity OR can manage all branches
         $user = Auth::user();
-        if (!$user->hasRole('Area Manager') && $activity->user_id !== $user->id) {
-            session()->flash('error', 'You can only complete your own activities.');
+        if (!$user->can('edit activities') || (!$user->canManageAllBranches() && $activity->user_id !== $user->id)) {
+            session()->flash('error', 'You do not have permission to complete this activity.');
             return;
         }
 
@@ -79,10 +79,10 @@ class ActivitiesList extends Component
     {
         $activity = Activity::findOrFail($activityId);
 
-        // Check permissions
+        // Check permissions - user must have edit activities permission AND either own the activity OR can manage all branches
         $user = Auth::user();
-        if (!$user->hasRole('Area Manager') && $activity->user_id !== $user->id) {
-            session()->flash('error', 'You can only cancel your own activities.');
+        if (!$user->can('edit activities') || (!$user->canManageAllBranches() && $activity->user_id !== $user->id)) {
+            session()->flash('error', 'You do not have permission to cancel this activity.');
             return;
         }
 
@@ -95,7 +95,7 @@ class ActivitiesList extends Component
         $user = Auth::user();
 
         $query = Activity::with(['user', 'branch', 'related'])
-            ->when(!$user->hasRole('Area Manager'), function ($q) use ($user) {
+            ->when(!$user->canManageAllBranches(), function ($q) use ($user) {
                 return $q->where(function ($query) use ($user) {
                     $query->where('user_id', $user->id)
                         ->orWhere('branch_id', $user->branch_id);
