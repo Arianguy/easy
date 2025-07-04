@@ -9,13 +9,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Notifications\HasDatabaseNotifications;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasDatabaseNotifications, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -31,6 +32,11 @@ class User extends Authenticatable
         'designation',
         'is_active',
         'last_login_at',
+        'email_reminders',
+        'lead_reminders',
+        'activity_reminders',
+        'overdue_notifications',
+        'upcoming_notifications',
     ];
 
     /**
@@ -55,6 +61,11 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
+            'email_reminders' => 'boolean',
+            'lead_reminders' => 'boolean',
+            'activity_reminders' => 'boolean',
+            'overdue_notifications' => 'boolean',
+            'upcoming_notifications' => 'boolean',
         ];
     }
 
@@ -128,10 +139,12 @@ class User extends Authenticatable
         return $this->assignedLeads()->where('status', 'converted')->count();
     }
 
-    public function getConversionRateAttribute()
+    public function getConversionRateAttribute(): float
     {
-        $total = $this->total_leads;
-        return $total > 0 ? round(($this->converted_leads / $total) * 100, 1) : 0;
+        $totalLeads = $this->assignedLeads()->count();
+        $convertedLeads = $this->assignedLeads()->where('status', 'converted')->count();
+
+        return $totalLeads > 0 ? round(($convertedLeads / $totalLeads) * 100, 1) : 0;
     }
 
     public function scopeActive($query)
@@ -154,5 +167,72 @@ class User extends Authenticatable
             ->take(2)
             ->map(fn($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+    /**
+     * Get notification preferences for this user
+     */
+    public function getNotificationPreferences(): array
+    {
+        return [
+            'email_reminders' => $this->email_reminders ?? true,
+            'lead_reminders' => $this->lead_reminders ?? true,
+            'activity_reminders' => $this->activity_reminders ?? true,
+            'overdue_notifications' => $this->overdue_notifications ?? true,
+            'upcoming_notifications' => $this->upcoming_notifications ?? true,
+        ];
+    }
+
+    /**
+     * Check if user wants to receive email reminders
+     */
+    public function wantsEmailReminders(): bool
+    {
+        return $this->email_reminders ?? true;
+    }
+
+    /**
+     * Check if user wants to receive lead reminders
+     */
+    public function wantsLeadReminders(): bool
+    {
+        return $this->lead_reminders ?? true;
+    }
+
+    /**
+     * Check if user wants to receive activity reminders
+     */
+    public function wantsActivityReminders(): bool
+    {
+        return $this->activity_reminders ?? true;
+    }
+
+    /**
+     * Check if user wants to receive overdue notifications
+     */
+    public function wantsOverdueNotifications(): bool
+    {
+        return $this->overdue_notifications ?? true;
+    }
+
+    /**
+     * Check if user wants to receive upcoming notifications
+     */
+    public function wantsUpcomingNotifications(): bool
+    {
+        return $this->upcoming_notifications ?? true;
+    }
+
+    /**
+     * Route notifications for the mail channel.
+     */
+    public function routeNotificationForMail($notification): array|string|null
+    {
+        // Only send email notifications if user has email reminders enabled
+        if (!$this->wantsEmailReminders()) {
+            return null;
+        }
+
+        return $this->email;
     }
 }

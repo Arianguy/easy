@@ -45,6 +45,11 @@
                 </flux:navlist.item>
             </flux:navlist>
 
+            <!-- Notification Bell for Desktop -->
+            <div class="px-4 py-2 hidden lg:block">
+                <livewire:notification-bell key="desktop-bell" />
+            </div>
+
             <!-- Desktop User Menu -->
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">
                 <flux:profile
@@ -96,6 +101,11 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
+
+            <!-- Notification Bell for Mobile -->
+            <div class="me-3">
+                <livewire:notification-bell key="mobile-bell" />
+            </div>
 
             <flux:dropdown position="top" align="end">
                 <flux:profile

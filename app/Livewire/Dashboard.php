@@ -32,6 +32,8 @@ class Dashboard extends Component
             'upcomingActivities' => $this->getUpcomingActivities(),
             'topPerformers' => $this->getTopPerformers(),
             'overdueLeads' => $this->getOverdueLeads(),
+            'todayReminders' => $this->getTodayReminders(),
+            'upcomingReminders' => $this->getUpcomingReminders(),
         ]);
     }
 
@@ -255,6 +257,96 @@ class Dashboard extends Component
         return $this->getOpportunityQuery()
             ->where('stage', 'won')
             ->avg('value') ?: 0;
+    }
+
+    private function getTodayReminders()
+    {
+        $reminders = collect();
+
+        // Today's lead follow-ups
+        $todayLeads = $this->getLeadQuery()
+            ->dueToday()
+            ->with(['customer', 'assignedUser'])
+            ->get();
+
+        foreach ($todayLeads as $lead) {
+            $reminders->push([
+                'type' => 'lead',
+                'title' => $lead->title,
+                'subtitle' => $lead->customer->name ?? 'No customer',
+                'due_at' => $lead->follow_up_date,
+                'priority' => $lead->priority,
+                'url' => route('leads.edit', $lead),
+            ]);
+        }
+
+        // Today's activities
+        $todayActivities = $this->getActivityQuery()
+            ->dueToday()
+            ->with(['user', 'related'])
+            ->get();
+
+        foreach ($todayActivities as $activity) {
+            $reminders->push([
+                'type' => 'activity',
+                'title' => $activity->subject,
+                'subtitle' => $activity->related ?
+                    class_basename($activity->related_type) . ': ' . ($activity->related->name ?? $activity->related->title ?? 'Untitled') :
+                    'No relation',
+                'due_at' => $activity->scheduled_at,
+                'priority' => 'medium',
+                'url' => route('activities.edit', $activity),
+            ]);
+        }
+
+        return $reminders->sortBy('due_at')->take(5);
+    }
+
+    private function getUpcomingReminders()
+    {
+        $reminders = collect();
+
+        // Upcoming lead follow-ups (next 3 days)
+        $upcomingLeads = $this->getLeadQuery()
+            ->upcoming(3)
+            ->with(['customer', 'assignedUser'])
+            ->where('follow_up_date', '>', today())
+            ->get();
+
+        foreach ($upcomingLeads as $lead) {
+            $reminders->push([
+                'type' => 'lead',
+                'title' => $lead->title,
+                'subtitle' => $lead->customer->name ?? 'No customer',
+                'due_at' => $lead->follow_up_date,
+                'priority' => $lead->priority,
+                'url' => route('leads.edit', $lead),
+                'days_until' => $lead->follow_up_date->diffInDays(today()),
+            ]);
+        }
+
+        // Upcoming activities (next 3 days)
+        $upcomingActivities = $this->getActivityQuery()
+            ->upcoming(3)
+            ->with(['user', 'related'])
+            ->where('scheduled_at', '>', now()->endOfDay())
+            ->get();
+
+        foreach ($upcomingActivities as $activity) {
+            $reminders->push([
+                'type' => 'activity',
+                'title' => $activity->subject,
+                'subtitle' => $activity->related ?
+                    class_basename($activity->related_type) . ': ' . ($activity->related->name ?? $activity->related->title ?? 'Untitled') :
+                    'No relation',
+                'due_at' => $activity->scheduled_at,
+                'priority' => 'medium',
+                'url' => route('activities.edit', $activity),
+                'days_until' => $activity->scheduled_at->diffInDays(now()),
+            ]);
+        }
+
+        return $reminders->sortBy('due_at')->take(5);
     }
 
     private function getBaseQuery()
