@@ -24,7 +24,7 @@
                     <flux:navlist.item icon="calendar" :href="route('activities.index')" :current="request()->routeIs('activities.*')" wire:navigate>{{ __('Activities') }}</flux:navlist.item>
                 </flux:navlist.group>
 
-                @role('Area Manager')
+                @role('Super Admin|Area Manager')
                 <flux:navlist.group :heading="__('Management')" class="grid">
                     <flux:navlist.item icon="building-office" :href="route('branches.index')" :current="request()->routeIs('branches.*')" wire:navigate>{{ __('Branches') }}</flux:navlist.item>
                     <flux:navlist.item icon="user-group" :href="route('users.index')" :current="request()->routeIs('users.*')" wire:navigate>{{ __('Users & Roles') }}</flux:navlist.item>

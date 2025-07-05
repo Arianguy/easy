@@ -13,17 +13,21 @@ class UserSeeder extends Seeder
     {
         $branches = Branch::all();
 
-        // Create Area Manager (can access all branches)
-        $areaManager = User::create([
-            'name' => 'Savio Fernandes',
-            'email' => 'savio@ashtelgroup.com',
-            'password' => Hash::make('Savio123'),
-            'phone' => '+919822456789',
-            'designation' => 'Area Manager',
-            'is_active' => true,
-            'branch_id' => null, // Area manager can access all branches
-        ]);
-        $areaManager->assignRole('Area Manager');
+        // Create or update Super Admin (can access everything)
+        $superAdmin = User::updateOrCreate(
+            ['email' => 'savio@ashtelgroup.com'],
+            [
+                'name' => 'Savio Fernandes',
+                'password' => Hash::make('Savio123'),
+                'phone' => '+919822456789',
+                'designation' => 'Super Admin',
+                'is_active' => true,
+                'branch_id' => null, // Super admin can access all branches
+            ]
+        );
+
+        // Remove existing roles and assign Super Admin role
+        $superAdmin->syncRoles(['Super Admin']);
 
         // // Create Sales Managers for each branch
         // foreach ($branches as $index => $branch) {

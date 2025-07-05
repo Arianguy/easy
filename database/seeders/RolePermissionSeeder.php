@@ -71,6 +71,11 @@ class RolePermissionSeeder extends Seeder
             // System permissions
             'manage system',
             'view all branches',
+            'manage roles',
+            'assign roles',
+            'manage settings',
+            'view system logs',
+            'manage integrations',
         ];
 
         foreach ($permissions as $permission) {
@@ -78,6 +83,10 @@ class RolePermissionSeeder extends Seeder
         }
 
         // Create roles and assign permissions
+
+        // Super Admin - Complete system access with all permissions
+        $superAdmin = Role::firstOrCreate(['name' => 'Super Admin']);
+        $superAdmin->syncPermissions(Permission::all());
 
         // Area Manager - Full access across all branches
         $areaManager = Role::firstOrCreate(['name' => 'Area Manager']);

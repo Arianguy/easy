@@ -44,8 +44,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('activities/create', App\Livewire\Activities\ActivityForm::class)->name('activities.create');
     Route::get('activities/{activity}/edit', App\Livewire\Activities\ActivityForm::class)->name('activities.edit');
 
-    // Management Routes (for Area Managers)
-    Route::middleware(['role:Area Manager'])->group(function () {
+    // Management Routes (for Super Admin and Area Managers)
+    Route::middleware(['role:Super Admin|Area Manager'])->group(function () {
         Route::get('branches', App\Livewire\Management\BranchesList::class)->name('branches.index');
         Route::get('branches/create', App\Livewire\Management\BranchForm::class)->name('branches.create');
         Route::get('branches/{branch}/edit', App\Livewire\Management\BranchForm::class)->name('branches.edit');

@@ -17,11 +17,12 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             BranchSeeder::class,
             UserSeeder::class,
-            CustomerSeeder::class,
-            LeadSeeder::class,
-            OpportunitySeeder::class,
-            CampaignSeeder::class,
-            ActivitySeeder::class,
+            InterestSeeder::class,
+            // CustomerSeeder::class,
+            // LeadSeeder::class,
+            // OpportunitySeeder::class,
+            // CampaignSeeder::class,
+            // ActivitySeeder::class,
         ]);
     }
 }

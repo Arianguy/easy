@@ -25,6 +25,7 @@
                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:border-blue-500 focus:ring-blue-500"
                 >
                     <option value="">All Roles</option>
+                    <option value="Super Admin">Super Admin</option>
                     <option value="Area Manager">Area Manager</option>
                     <option value="Sales Manager">Sales Manager</option>
                     <option value="Sales Executive">Sales Executive</option>
@@ -33,7 +34,18 @@
         </div>
 
         <!-- Role Statistics -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <flux:badge color="red" size="lg">SA</flux:badge>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Super Admins</div>
+                        <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $this->roleStats['Super Admin'] ?? 0 }}</div>
+                    </div>
+                </div>
+            </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
@@ -103,7 +115,7 @@
                                     @if($user->roles->isNotEmpty())
                                         @foreach($user->roles as $role)
                                             <flux:badge
-                                                :color="$role->name === 'Area Manager' ? 'purple' : ($role->name === 'Sales Manager' ? 'blue' : 'green')"
+                                                :color="$role->name === 'Super Admin' ? 'red' : ($role->name === 'Area Manager' ? 'purple' : ($role->name === 'Sales Manager' ? 'blue' : 'green'))"
                                                 size="sm"
                                                 class="mr-1"
                                             >
@@ -178,6 +190,7 @@
         <div class="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
             <flux:heading size="sm" class="text-blue-900 dark:text-blue-100 mb-3">Role Permissions</flux:heading>
             <div class="text-sm text-blue-800 dark:text-blue-200 space-y-2">
+                <div><strong>Super Admin:</strong> Complete system access with all permissions including management features</div>
                 <div><strong>Area Manager:</strong> Full access to all branches, users, and CRM data</div>
                 <div><strong>Sales Manager:</strong> Manage team members and customers within their branch</div>
                 <div><strong>Sales Executive:</strong> Manage customers, leads, and opportunities within their branch</div>
