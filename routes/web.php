@@ -34,7 +34,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('opportunities', App\Livewire\Opportunities\OpportunitiesList::class)->name('opportunities.index');
     Route::get('opportunities/create', App\Livewire\Opportunities\OpportunityForm::class)->name('opportunities.create');
-    Route::get('opportunities/{opportunity}/edit', App\Livewire\Opportunities\OpportunityForm::class)->name('opportunities.edit');
+    Route::get('opportunities/{opportunity}/edit', App\Livewire\Opportunities\OpportunityDetail::class)->name('opportunities.edit');
 
     Route::get('campaigns', App\Livewire\Campaigns\CampaignsList::class)->name('campaigns.index');
     Route::get('campaigns/create', App\Livewire\Campaigns\CampaignForm::class)->name('campaigns.create');
