@@ -1,7 +1,7 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/ashtelgr/banko.ashtelgroup.online
+    - export DEPLOYPATH=/home/ashtelgr/easycrm.ashtelgroup.online
     - /bin/cp -R * $DEPLOYPATH
     - cd $DEPLOYPATH
     - /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader
