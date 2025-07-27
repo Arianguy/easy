@@ -71,9 +71,9 @@ class CustomersList extends Component
             })
             ->orderBy('created_at', 'desc');
 
-        // Apply branch scope for non-Area Managers
+        // Apply branch scope for non-Area Managers and non-Super Admins
         $user = Auth::user();
-        if (!$user->hasRole('Area Manager')) {
+        if (!$user->hasRole('Area Manager') && !$user->hasRole('Super Admin')) {
             $query->where('branch_id', $user->branch_id);
         }
 

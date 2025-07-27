@@ -154,7 +154,7 @@
                         @forelse($leads as $lead)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $lead->title }}</div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $lead->lead_number }}</div>
                                     @if($lead->description)
                                         <div class="text-sm text-gray-500 dark:text-gray-400">{{ Str::limit($lead->description, 50) }}</div>
                                     @endif
@@ -263,11 +263,11 @@
         <div class="xl:hidden space-y-4">
             @forelse($leads as $lead)
                 <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                    <!-- Lead Title and Status -->
+                    <!-- Lead Number and Status -->
                     <div class="flex items-start justify-between mb-3">
                         <div class="flex-1 min-w-0">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
-                                {{ $lead->title }}
+                                {{ $lead->lead_number }}
                             </h3>
                             @if($lead->description)
                                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">

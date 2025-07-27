@@ -10,8 +10,10 @@ class BranchScope implements Scope
 {
     public function apply(Builder $builder, Model $model): void
     {
-        if (auth()->check() && !auth()->user()->canManageAllBranches()) {
-            $builder->where('branch_id', auth()->user()->branch_id);
+        $user = auth()->user();
+        
+        if ($user && !$user->canManageAllBranches() && $user->branch_id !== null) {
+            $builder->where('branch_id', $user->branch_id);
         }
     }
 }

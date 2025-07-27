@@ -8,13 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 
 class Lead extends Model
 {
     use HasFactory, BelongsToBranch;
 
     protected $fillable = [
-        'title',
         'description',
         'status',
         'priority',
@@ -28,6 +28,7 @@ class Lead extends Model
         'assigned_user_id',
         'branch_id',
         'created_by',
+        'lead_number',
     ];
 
     protected $casts = [
@@ -36,6 +37,63 @@ class Lead extends Model
         'estimated_value' => 'decimal:2',
         'tags' => 'array',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($lead) {
+            if (empty($lead->lead_number)) {
+                // Get the next value from the counter table in a transaction-safe way
+                $nextNumber = DB::transaction(function () {
+                    // Lock the counter row for update
+                    $counter = DB::table('lead_number_counter')
+                        ->where('id', 1)
+                        ->lockForUpdate()
+                        ->first();
+                    
+                    if (!$counter) {
+                        // Initialize counter if it doesn't exist
+                        $nextId = 1;
+                        DB::table('lead_number_counter')->insert(['id' => 1, 'next_number' => 2]);
+                    } else {
+                        $nextId = $counter->next_number;
+                        // Increment the counter for next time
+                        DB::table('lead_number_counter')
+                            ->where('id', 1)
+                            ->update(['next_number' => $nextId + 1]);
+                    }
+                    
+                    return $nextId;
+                });
+                
+                $lead->lead_number = 'LD-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+                $lead->title = 'Lead ' . $lead->lead_number; // Set default title using lead number
+            }
+        });
+    }
+
+    /**
+     * Get the next available lead number
+     */
+    public static function getNextLeadNumber(): string
+    {
+        // Use a transaction to ensure we get the next number safely
+        return DB::transaction(function () {
+            // Lock the counter row for update
+            $counter = DB::table('lead_number_counter')
+                ->where('id', 1)
+                ->lockForUpdate()
+                ->first();
+            
+            if (!$counter) {
+                // If no counter exists yet, the next number will be 1
+                $nextNumber = 1;
+            } else {
+                $nextNumber = $counter->next_number;
+            }
+            
+            return 'LD-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+        });
+    }
 
     public function customer(): BelongsTo
     {

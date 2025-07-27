@@ -126,7 +126,7 @@ class User extends Authenticatable
 
     public function canManageAllBranches(): bool
     {
-        return $this->isAreaManager();
+        return $this->hasRole('Super Admin') || $this->isAreaManager();
     }
 
     public function getTotalLeadsAttribute()

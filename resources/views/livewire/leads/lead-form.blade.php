@@ -633,22 +633,21 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Title -->
+                        <!-- Lead Number -->
                         <div class="md:col-span-2">
-                            <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Lead Title <span class="text-red-500">*</span>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Lead Number
                             </label>
-                            <input
-                                type="text"
-                                id="title"
-                                wire:model="title"
-                                class="block w-full px-3 py-2 border border-gray-300 rounded-md {{ $this->isReadOnly() ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : 'focus:ring-blue-500 focus:border-blue-500' }}"
-                                placeholder="Lead Title"
-                                {{ $this->isReadOnly() ? 'readonly' : '' }}
-                            />
-                            @error('title')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <div class="flex items-center space-x-2">
+                                <div class="px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 font-mono">
+                                    {{ $leadId ? $lead_number : $next_lead_number }}
+                                </div>
+                                @if(!$leadId)
+                                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                                        (Next available number)
+                                    </span>
+                                @endif
+                            </div>
                         </div>
 
                         <!-- Status -->
