@@ -24,3 +24,4 @@ yarn-error.log
 /.zed
 error_log
 public/error_log
+/storage/*
